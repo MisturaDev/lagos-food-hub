@@ -1,9 +1,12 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-type Role = "donor" | "beneficiary" | "volunteer" | "admin";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Role, roleOptions } from "@/lib/ui";
 
 type RegisterState = {
   name: string;
@@ -49,118 +52,98 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
-    router.push(`/${form.role}`);
-    router.refresh();
-    setLoading(false);
+    setTimeout(() => {
+      router.push(`/${form.role}`);
+      router.refresh();
+      setLoading(false);
+    }, 500);
   }
 
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-80px)] w-full max-w-6xl items-center justify-center px-4 py-10">
-      <section className="w-full max-w-md rounded-xl border border-green-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-bold text-[#16A34A]">Create an Account</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Register as Donor, Beneficiary, Volunteer, or Admin.
-        </p>
-
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
-          <div>
-            <label htmlFor="name" className="mb-1 block text-sm font-medium text-slate-700">
-              Full Name
-            </label>
-            <input
-              id="name"
-              className="w-full rounded-md border border-green-200 px-3 py-2 text-sm outline-none ring-[#22C55E] focus:ring-2"
-              value={form.name}
-              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="w-full rounded-md border border-green-200 px-3 py-2 text-sm outline-none ring-[#22C55E] focus:ring-2"
-              value={form.email}
-              onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="phone" className="mb-1 block text-sm font-medium text-slate-700">
-              Phone (optional)
-            </label>
-            <input
-              id="phone"
-              className="w-full rounded-md border border-green-200 px-3 py-2 text-sm outline-none ring-[#22C55E] focus:ring-2"
-              value={form.phone}
-              onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="role" className="mb-1 block text-sm font-medium text-slate-700">
-              Role
-            </label>
-            <select
-              id="role"
-              className="w-full rounded-md border border-green-200 px-3 py-2 text-sm outline-none ring-[#22C55E] focus:ring-2"
-              value={form.role}
-              onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value as Role }))}
-            >
-              <option value="donor">Donor</option>
-              <option value="beneficiary">Beneficiary</option>
-              <option value="volunteer">Volunteer</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              className="w-full rounded-md border border-green-200 px-3 py-2 text-sm outline-none ring-[#22C55E] focus:ring-2"
-              value={form.password}
-              onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="mb-1 block text-sm font-medium text-slate-700"
-            >
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              className="w-full rounded-md border border-green-200 px-3 py-2 text-sm outline-none ring-[#22C55E] focus:ring-2"
-              value={form.confirmPassword}
-              onChange={(e) => setForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
-            />
-          </div>
-
-          {error && (
-            <p className="rounded-md border border-yellow-300 bg-yellow-50 px-3 py-2 text-sm text-amber-800">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-md bg-[#16A34A] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#15803D] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {loading ? "Creating account..." : "Register"}
-          </button>
-        </form>
-      </section>
+    <main className="mx-auto w-full max-w-6xl px-4 py-10">
+      <p className="text-sm text-slate-500">
+        <Link href="/" className="hover:text-[#0f766e]">
+          Home
+        </Link>{" "}
+        / <span className="font-semibold text-slate-700">Register</span>
+      </p>
+      <div className="mt-4 grid items-start gap-5 md:grid-cols-3">
+        <div className="md:col-span-2">
+          <Card title="Create an account" description="Pick your role and set up your profile.">
+            <form onSubmit={onSubmit} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <Input
+                  id="name"
+                  label="Full Name"
+                  value={form.name}
+                  onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+                />
+                <Input
+                  id="email"
+                  label="Email"
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                />
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Input
+                  id="phone"
+                  label="Phone (optional)"
+                  value={form.phone}
+                  onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
+                />
+                <div>
+                  <label htmlFor="role" className="mb-1 block text-sm font-medium text-slate-800">
+                    Role
+                  </label>
+                  <select
+                    id="role"
+                    className="w-full rounded-md border border-teal-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:ring-2 focus-visible:ring-[#0f766e]"
+                    value={form.role}
+                    onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value as Role }))}
+                  >
+                    {roleOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Input
+                  id="password"
+                  label="Password"
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
+                />
+                <Input
+                  id="confirmPassword"
+                  label="Confirm Password"
+                  type="password"
+                  value={form.confirmPassword}
+                  onChange={(e) => setForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
+                />
+              </div>
+              {error ? (
+                <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {error}
+                </p>
+              ) : null}
+              <Button type="submit" disabled={loading}>
+                {loading ? "Creating account..." : "Register"}
+              </Button>
+            </form>
+          </Card>
+        </div>
+        <Card title="Already registered?" description="You can sign in and choose your dashboard.">
+          <Link href="/login">
+            <Button variant="secondary">Go to Login</Button>
+          </Link>
+        </Card>
+      </div>
     </main>
   );
 }
