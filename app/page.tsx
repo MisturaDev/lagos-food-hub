@@ -7,10 +7,10 @@ import { roleOptions } from "@/lib/ui";
 export default function Home() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10 md:py-14">
-      <section className="rounded-2xl border border-teal-100 bg-gradient-to-br from-white via-teal-50 to-amber-50 p-8 shadow-sm md:p-12">
+      <section className="rounded-2xl border border-green-100 bg-gradient-to-br from-white via-green-50 to-amber-50 p-8 shadow-sm md:p-12">
         <Badge tone="success">Community Food Logistics</Badge>
-        <h1 className="mt-4 text-4xl font-black tracking-tight text-[#134e4a] md:text-5xl">
-          Redirecting Surplus Meals Across Lagos
+        <h1 className="mt-4 text-4xl font-black tracking-tight text-[#166534] md:text-5xl">
+          Connecting Surplus Meals to Communities Across Lagos
         </h1>
         <p className="mt-4 max-w-2xl text-base text-slate-700 md:text-lg">
           Lagos Food Hub helps donors, volunteers, and local communities coordinate food rescue and
@@ -27,13 +27,13 @@ export default function Home() {
       </section>
 
       <section className="mt-8">
-        <h2 className="text-xl font-bold text-[#134e4a] md:text-2xl">Choose your role</h2>
+        <h2 className="text-xl font-bold text-[#166534] md:text-2xl">Choose your role</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           {roleOptions.map((role) => (
             <Card key={role.value} title={role.label} description={role.description}>
               <Link
                 href={`/${role.value}`}
-                className="inline-flex rounded-md border border-teal-200 px-3 py-2 text-sm font-semibold text-[#0f766e] hover:bg-teal-50"
+                className="inline-flex rounded-md border border-green-200 px-3 py-2 text-sm font-semibold text-[#16A34A] hover:bg-green-50"
               >
                 View {role.label} Dashboard
               </Link>
@@ -43,7 +43,7 @@ export default function Home() {
       </section>
 
       <section className="mt-8">
-        <h2 className="text-xl font-bold text-[#134e4a] md:text-2xl">How it works</h2>
+        <h2 className="text-xl font-bold text-[#166534] md:text-2xl">How it works</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-3">
           <Card title="1. Create or log in" description="Pick your role and complete your profile.">
             <p className="text-sm text-slate-600">Donors, beneficiaries, volunteers, and admins use tailored flows.</p>
@@ -59,3 +59,4 @@ export default function Home() {
     </main>
   );
 }
+

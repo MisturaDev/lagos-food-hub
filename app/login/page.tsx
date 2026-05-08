@@ -36,7 +36,7 @@ export default function LoginPage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
       <p className="text-sm text-slate-500">
-        <Link href="/" className="hover:text-[#0f766e]">
+        <Link href="/" className="hover:text-[#16A34A]">
           Home
         </Link>{" "}
         / <span className="font-semibold text-slate-700">Login</span>
@@ -65,7 +65,7 @@ export default function LoginPage() {
                 </label>
                 <select
                   id="role"
-                  className="w-full rounded-md border border-teal-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:ring-2 focus-visible:ring-[#0f766e]"
+                  className="w-full rounded-md border border-green-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:ring-2 focus-visible:ring-[#16A34A]"
                   value={role}
                   onChange={(e) => setRole(e.target.value as Role)}
                 >
@@ -96,3 +96,4 @@ export default function LoginPage() {
     </main>
   );
 }
+
