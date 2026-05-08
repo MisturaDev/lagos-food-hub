@@ -3,8 +3,8 @@
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
-  --primary-green: #0f766e;
-  --secondary-green: #14b8a6;
+  --primary-green: #16A34A;
+  --secondary-green: #22C55E;
   --accent-yellow: #f59e0b;
 }
 
@@ -20,7 +20,7 @@
 
 body {
   background:
-    radial-gradient(circle at 10% 10%, #ccfbf1 0%, transparent 30%),
+    radial-gradient(circle at 10% 10%, #DCFCE7 0%, transparent 30%),
     radial-gradient(circle at 90% 30%, #fef3c7 0%, transparent 25%),
     var(--background);
   color: var(--foreground);
@@ -30,3 +30,4 @@ body {
 * {
   scroll-behavior: smooth;
 }
+

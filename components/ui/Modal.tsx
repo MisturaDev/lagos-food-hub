@@ -19,7 +19,7 @@ export function Modal({ open, title, children, onClose }: ModalProps) {
     >
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-[#134e4a]">{title}</h3>
+          <h3 className="text-lg font-bold text-[#166534]">{title}</h3>
           <button
             className="rounded-md px-2 py-1 text-sm text-slate-500 hover:bg-slate-100"
             onClick={onClose}
@@ -33,3 +33,4 @@ export function Modal({ open, title, children, onClose }: ModalProps) {
     </div>
   );
 }
+

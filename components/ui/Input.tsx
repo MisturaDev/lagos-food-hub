@@ -13,7 +13,7 @@ export function Input({ id, label, error, className = "", ...props }: InputProps
       </label>
       <input
         id={id}
-        className={`w-full rounded-md border border-teal-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus-visible:ring-2 focus-visible:ring-[#0f766e] ${error ? "border-red-400" : ""} ${className}`}
+        className={`w-full rounded-md border border-green-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus-visible:ring-2 focus-visible:ring-[#16A34A] ${error ? "border-red-400" : ""} ${className}`}
         aria-invalid={Boolean(error)}
         {...props}
       />
@@ -21,3 +21,4 @@ export function Input({ id, label, error, className = "", ...props }: InputProps
     </div>
   );
 }
+
