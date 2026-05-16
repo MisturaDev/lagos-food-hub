@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/Card";
 import { roleOptions } from "@/lib/ui";
 
 export default function Home() {
+  const publicRoles = roleOptions.filter((role) => role.value !== "admin");
+
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10 md:py-14">
       <section className="rounded-2xl border border-green-100 bg-gradient-to-br from-white via-green-50 to-amber-50 p-8 shadow-sm md:p-12">
@@ -28,12 +30,13 @@ export default function Home() {
 
       <section className="mt-8">
         <h2 className="text-xl font-bold text-[#166534] md:text-2xl">Choose your role</h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          {roleOptions.map((role) => (
-            <Card key={role.value} title={role.label} description={role.description}>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
+          {publicRoles.map((role) => (
+            <Card key={role.value} title={role.label}>
+              <p className="text-sm text-slate-600">{role.description}</p>
               <Link
                 href={`/${role.value}`}
-                className="inline-flex rounded-md border border-green-200 px-3 py-2 text-sm font-semibold text-[#16A34A] hover:bg-green-50"
+                className="mt-3 inline-flex rounded-md border border-green-200 px-3 py-1.5 text-xs font-semibold text-[#16A34A] hover:bg-green-50"
               >
                 View {role.label} Dashboard
               </Link>

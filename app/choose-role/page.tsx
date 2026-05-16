@@ -26,15 +26,18 @@ export default function ChooseRolePage() {
         </p>
       </section>
 
-      <section className="mt-6 grid gap-4 md:grid-cols-2">
+      <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {selectableRoles.map((role) => (
-          <Card key={role.value} title={role.label} description={role.description}>
-            <Link
-              href={`/${role.value}`}
-              className="inline-flex rounded-md bg-[#16A34A] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#15803D]"
-            >
-              Continue as {role.label}
-            </Link>
+          <Card key={role.value} title={role.label}>
+            <div className="space-y-3">
+              <p className="line-clamp-2 text-sm text-slate-600">{role.description}</p>
+              <Link
+                href={`/${role.value}`}
+                className="inline-flex rounded-md bg-[#16A34A] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#15803D]"
+              >
+                Continue as {role.label}
+              </Link>
+            </div>
           </Card>
         ))}
       </section>
