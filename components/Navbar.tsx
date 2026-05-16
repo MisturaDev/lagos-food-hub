@@ -13,8 +13,9 @@ export function Navbar() {
     <header className="border-b border-green-200 bg-white/95 backdrop-blur">
       <nav className="mx-auto w-full max-w-6xl px-4 py-4" aria-label="Main navigation">
         <div className="flex items-center justify-between">
-          <Link href="/" className="text-lg font-extrabold tracking-tight text-[#16A34A]">
-            Lagos Food Hub
+          <Link href="/" className="block">
+            <p className="text-lg font-extrabold tracking-tight text-[#16A34A]">Lagos Food Hub</p>
+            <p className="text-xs text-slate-500">Food Rescue Network</p>
           </Link>
           <button
             onClick={() => setOpen((prev) => !prev)}
