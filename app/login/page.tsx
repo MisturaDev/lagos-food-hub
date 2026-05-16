@@ -6,13 +6,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { Role, roleOptions } from "@/lib/ui";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<Role>("donor");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -27,7 +25,7 @@ export default function LoginPage() {
 
     setLoading(true);
     setTimeout(() => {
-      router.push(`/${role}`);
+      router.push("/choose-role");
       router.refresh();
       setLoading(false);
     }, 500);
@@ -43,7 +41,7 @@ export default function LoginPage() {
       </p>
       <div className="mt-4 grid items-start gap-5 md:grid-cols-3">
         <div className="md:col-span-2">
-          <Card title="Login" description="Sign in to continue to your selected dashboard.">
+          <Card title="Login" description="Sign in to continue to your workspace.">
             <form onSubmit={onSubmit} className="space-y-4">
               <Input
                 id="email"
@@ -59,23 +57,6 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              <div>
-                <label htmlFor="role" className="mb-1 block text-sm font-medium text-slate-800">
-                  Login As
-                </label>
-                <select
-                  id="role"
-                  className="w-full rounded-md border border-green-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:ring-2 focus-visible:ring-[#16A34A]"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as Role)}
-                >
-                  {roleOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
               {error ? (
                 <p className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
                   {error}

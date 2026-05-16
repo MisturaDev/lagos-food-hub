@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { Role, roleOptions } from "@/lib/ui";
 
 type RegisterState = {
   name: string;
@@ -14,7 +13,6 @@ type RegisterState = {
   phone: string;
   password: string;
   confirmPassword: string;
-  role: Role;
 };
 
 const initialState: RegisterState = {
@@ -23,7 +21,6 @@ const initialState: RegisterState = {
   phone: "",
   password: "",
   confirmPassword: "",
-  role: "donor",
 };
 
 export default function RegisterPage() {
@@ -53,7 +50,7 @@ export default function RegisterPage() {
 
     setLoading(true);
     setTimeout(() => {
-      router.push(`/${form.role}`);
+      router.push("/choose-role");
       router.refresh();
       setLoading(false);
     }, 500);
@@ -69,7 +66,7 @@ export default function RegisterPage() {
       </p>
       <div className="mt-4 grid items-start gap-5 md:grid-cols-3">
         <div className="md:col-span-2">
-          <Card title="Create an account" description="Pick your role and set up your profile.">
+          <Card title="Create an account" description="Set up your account, then choose a role.">
             <form onSubmit={onSubmit} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <Input
@@ -86,30 +83,13 @@ export default function RegisterPage() {
                   onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
                 />
               </div>
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-1">
                 <Input
                   id="phone"
                   label="Phone (optional)"
                   value={form.phone}
                   onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
                 />
-                <div>
-                  <label htmlFor="role" className="mb-1 block text-sm font-medium text-slate-800">
-                    Role
-                  </label>
-                  <select
-                    id="role"
-                    className="w-full rounded-md border border-green-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:ring-2 focus-visible:ring-[#16A34A]"
-                    value={form.role}
-                    onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value as Role }))}
-                  >
-                    {roleOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <Input
