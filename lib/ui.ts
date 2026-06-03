@@ -24,10 +24,7 @@ export const roleOptions: Array<{ value: Role; label: string; description: strin
 ];
 
 export const navLinks: Array<{ href: string; label: string }> = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/matches", label: "Matches" },
   { href: "/donor", label: "Donor" },
   { href: "/beneficiary", label: "Beneficiary" },
   { href: "/volunteer", label: "Volunteer" },
-  { href: "/profile", label: "Profile" },
 ];

@@ -37,24 +37,21 @@ export function Sidebar() {
   return (
     <aside className="hidden w-72 shrink-0 border-r border-green-100 bg-white p-4 md:flex md:min-h-screen md:flex-col">
       <nav className="space-y-5" aria-label="Sidebar navigation">
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Main</p>
-          <div className="space-y-1">
-            {mainNav.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`block rounded-md px-3 py-2 text-sm font-medium ${
-                    isActive ? "bg-green-100 text-[#166534]" : "text-slate-700 hover:bg-green-50"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
+        <div className="space-y-1">
+          {mainNav.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`block rounded-md px-3 py-2 text-sm font-medium ${
+                  isActive ? "bg-green-100 text-[#166534]" : "text-slate-700 hover:bg-green-50"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
 
         <div>
