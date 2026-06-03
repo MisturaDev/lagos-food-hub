@@ -6,6 +6,7 @@ import { ACCOUNT_NAME_KEY, ACTIVE_ROLE_KEY, PROFILE_KEY } from "@/lib/ui-session
 
 const mainNav = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/matches", label: "Match Center" },
   { href: "/notifications", label: "Notifications" },
 ];
 

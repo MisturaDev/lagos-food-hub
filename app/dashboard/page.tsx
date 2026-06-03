@@ -91,6 +91,11 @@ export default function DashboardPage() {
               <Link href={roleActionHref[activeRole]}>
                 <Button className="w-full px-3 py-1.5 text-xs">{actionLabel}</Button>
               </Link>
+              <Link href="/matches">
+                <Button variant="secondary" className="w-full px-3 py-1.5 text-xs">
+                  Find Matches
+                </Button>
+              </Link>
               <Link href="/beneficiary">
                 <Button variant="secondary" className="w-full px-3 py-1.5 text-xs">
                   Request Food

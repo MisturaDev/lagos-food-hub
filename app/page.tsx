@@ -25,6 +25,9 @@ export default function Home() {
           <Link href="/login">
             <Button variant="secondary">Explore Roles</Button>
           </Link>
+          <Link href="/matches">
+            <Button variant="ghost">View Matches</Button>
+          </Link>
         </div>
       </section>
 
