@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
+  --background: #f7faf8;
   --foreground: #0f172a;
   --primary-green: #16A34A;
   --secondary-green: #22C55E;
   --accent-yellow: #f59e0b;
+  --lagos-ink: #12312a;
 }
 
 @theme inline {
@@ -14,20 +15,22 @@
   --color-primary-green: var(--primary-green);
   --color-secondary-green: var(--secondary-green);
   --color-accent-yellow: var(--accent-yellow);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Inter", "Segoe UI", Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
 body {
-  background:
-    radial-gradient(circle at 10% 10%, #DCFCE7 0%, transparent 30%),
-    radial-gradient(circle at 90% 30%, #fef3c7 0%, transparent 25%),
-    var(--background);
+  background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 * {
   scroll-behavior: smooth;
+}
+
+::selection {
+  background: #bbf7d0;
+  color: var(--lagos-ink);
 }
 
