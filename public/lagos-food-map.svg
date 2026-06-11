@@ -1,0 +1,32 @@
+<svg width="780" height="620" viewBox="0 0 780 620" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Lagos food rescue route map</title>
+  <desc id="desc">An illustrated operational map showing donor pickup points, beneficiary drop-offs, and volunteer routes across Lagos.</desc>
+  <rect width="780" height="620" fill="#F8FAFC"/>
+  <path d="M0 0H780V620H0V0Z" fill="#F7FAF8"/>
+  <path d="M80 400C160 340 224 362 300 306C382 246 426 156 540 152C622 149 686 194 780 168V620H0V478C30 454 50 423 80 400Z" fill="#D1FAE5"/>
+  <path d="M0 462C74 430 124 448 202 410C316 354 348 262 464 246C574 231 660 300 780 248V620H0V462Z" fill="#BBF7D0"/>
+  <path d="M68 151C141 106 224 120 302 169C382 219 458 218 538 178C614 140 691 127 780 166" stroke="#CBD5E1" stroke-width="18" stroke-linecap="round"/>
+  <path d="M58 322C144 300 203 324 274 360C356 401 438 426 514 380C596 330 661 317 738 354" stroke="#CBD5E1" stroke-width="18" stroke-linecap="round"/>
+  <path d="M96 155C198 169 295 238 384 275C491 320 575 298 686 244" stroke="#166534" stroke-width="7" stroke-linecap="round" stroke-dasharray="16 18"/>
+  <path d="M126 394C214 337 297 352 384 390C476 430 566 417 652 358" stroke="#F59E0B" stroke-width="7" stroke-linecap="round" stroke-dasharray="16 18"/>
+  <circle cx="150" cy="160" r="36" fill="#166534"/>
+  <path d="M134 162H166M140 148H160C165 148 169 152 169 157V176H131V157C131 152 135 148 140 148Z" stroke="white" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="384" cy="276" r="34" fill="#F59E0B"/>
+  <path d="M369 276H399M384 260V292" stroke="#12312A" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="650" cy="244" r="36" fill="#166534"/>
+  <path d="M636 242L647 253L666 232" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="142" cy="394" r="34" fill="#F59E0B"/>
+  <path d="M126 396H158M132 384H152C157 384 161 388 161 393V410H123V393C123 388 127 384 132 384Z" stroke="#12312A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="384" cy="390" r="34" fill="#166534"/>
+  <path d="M369 391L380 402L399 381" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="650" cy="358" r="34" fill="#F59E0B"/>
+  <path d="M635 358H665M650 342V374" stroke="#12312A" stroke-width="5" stroke-linecap="round"/>
+  <rect x="52" y="44" width="250" height="82" rx="8" fill="white" stroke="#DCFCE7"/>
+  <text x="76" y="78" fill="#12312A" font-family="Arial, sans-serif" font-size="22" font-weight="700">Live Lagos Routes</text>
+  <text x="76" y="104" fill="#475569" font-family="Arial, sans-serif" font-size="15">Donor pickup to community drop-off</text>
+  <rect x="520" y="464" width="202" height="86" rx="8" fill="white" stroke="#DCFCE7"/>
+  <circle cx="548" cy="493" r="7" fill="#166534"/>
+  <text x="566" y="498" fill="#334155" font-family="Arial, sans-serif" font-size="15">Ready to dispatch</text>
+  <circle cx="548" cy="525" r="7" fill="#F59E0B"/>
+  <text x="566" y="530" fill="#334155" font-family="Arial, sans-serif" font-size="15">Volunteer needed</text>
+</svg>
