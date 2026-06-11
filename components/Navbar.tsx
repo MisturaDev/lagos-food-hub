@@ -1,128 +1,60 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { navLinks } from "@/lib/ui";
 
 export function Navbar() {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-
   return (
-    <header className="sticky top-0 z-40 border-b border-green-200 bg-white/95 backdrop-blur">
-      <nav className="mx-auto w-full max-w-6xl px-4 py-4" aria-label="Main navigation">
-        <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <span className="relative flex h-10 w-10 items-center justify-center rounded-md bg-[#166534] text-xl font-black text-white shadow-sm">
-              F
-              <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-[#F59E0B]" />
+    <header className="sticky top-0 z-40 border-b border-green-100 bg-white/95 backdrop-blur">
+      <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3" aria-label="Top bar">
+        <Link href="/" className="flex min-w-0 items-center gap-3">
+          <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#166534] text-xl font-black text-white shadow-sm">
+            F
+            <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-[#F59E0B]" />
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-lg font-extrabold tracking-tight text-[#166534]">
+              Lagos Food Hub
             </span>
-            <span>
-              <span className="block text-lg font-extrabold tracking-tight text-[#166534]">Lagos Food Hub</span>
-              <span className="block text-xs text-slate-500">Food Rescue Network</span>
-            </span>
-          </Link>
-          <button
-            onClick={() => setOpen((prev) => !prev)}
-            className="rounded-md border border-green-300 px-3 py-1.5 text-sm font-semibold text-[#166534] md:hidden"
-            aria-expanded={open}
-            aria-controls="mobile-menu"
+            <span className="block truncate text-xs text-slate-500">Food Rescue Network</span>
+          </span>
+        </Link>
+
+        <div className="hidden min-w-0 max-w-md flex-1 items-center rounded-md border border-slate-200 bg-white px-3 py-2 shadow-sm lg:flex">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="h-4 w-4 text-slate-400"
+            aria-hidden="true"
           >
-            Menu
-          </button>
-          <div className="hidden items-center gap-2 md:flex">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16A34A] ${isActive ? "bg-green-100 text-[#166534]" : "text-slate-700 hover:bg-green-50 hover:text-[#166534]"}`}
-                  aria-current={isActive ? "page" : undefined}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-            <Link
-              href="/notifications"
-              aria-label="Notifications"
-              className="px-1 py-1 text-slate-700 transition hover:text-[#166534]"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                className="h-6 w-6"
-                aria-hidden="true"
-              >
-                <path d="M15 17h5l-1.4-1.4a2 2 0 0 1-.6-1.4V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5" />
-                <path d="M10 17a2 2 0 0 0 4 0" />
-              </svg>
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-md border border-[#16A34A] px-3 py-1.5 text-sm font-medium text-[#166534] transition hover:bg-green-50"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="rounded-md bg-[#16A34A] px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-[#15803D]"
-            >
-              Register
-            </Link>
-          </div>
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          </svg>
+          <input
+            type="search"
+            placeholder="Search donors, areas, matches..."
+            className="ml-2 w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+            aria-label="Search"
+          />
         </div>
 
-        {open ? (
-          <div id="mobile-menu" className="mt-3 space-y-2 border-t border-green-100 pt-3 md:hidden">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`block rounded-md px-3 py-2 text-sm font-medium ${isActive ? "bg-green-100 text-[#166534]" : "text-slate-700 hover:bg-green-50 hover:text-[#166534]"}`}
-                  onClick={() => setOpen(false)}
-                  aria-current={isActive ? "page" : undefined}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-            <div className="flex gap-2 pt-1">
-              <Link
-                href="/notifications"
-                className="w-full px-3 py-2 text-center text-sm font-medium text-[#16A34A] transition hover:text-[#15803D]"
-                onClick={() => setOpen(false)}
-              >
-                Notifications
-              </Link>
-            </div>
-            <div className="flex gap-2 pt-1">
-              <Link
-                href="/login"
-                className="w-full rounded-md border border-[#16A34A] px-3 py-2 text-center text-sm font-medium text-[#16A34A]"
-                onClick={() => setOpen(false)}
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="w-full rounded-md bg-[#16A34A] px-3 py-2 text-center text-sm font-semibold text-white"
-                onClick={() => setOpen(false)}
-              >
-                Register
-              </Link>
-            </div>
-          </div>
-        ) : null}
+        <div className="flex items-center gap-2">
+          <Link
+            href="/login"
+            className="hidden rounded-md border border-green-200 px-3 py-2 text-sm font-semibold text-[#166534] transition hover:bg-green-50 sm:inline-flex"
+          >
+            Login
+          </Link>
+          <Link
+            href="/register"
+            className="rounded-md bg-[#16A34A] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#15803D]"
+          >
+            Register
+          </Link>
+        </div>
       </nav>
     </header>
   );
 }
-

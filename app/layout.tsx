@@ -20,7 +20,7 @@ export default function RootLayout({
           <Navbar />
           <div className="md:flex">
             <Sidebar />
-            <div className="w-full">{children}</div>
+            <div className="min-w-0 flex-1">{children}</div>
           </div>
         </div>
       </body>
