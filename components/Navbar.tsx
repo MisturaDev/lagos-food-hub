@@ -10,16 +10,22 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="border-b border-green-200 bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-40 border-b border-green-200 bg-white/95 backdrop-blur">
       <nav className="mx-auto w-full max-w-6xl px-4 py-4" aria-label="Main navigation">
         <div className="flex items-center justify-between">
-          <Link href="/" className="block">
-            <p className="text-lg font-extrabold tracking-tight text-[#16A34A]">Lagos Food Hub</p>
-            <p className="text-xs text-slate-500">Food Rescue Network</p>
+          <Link href="/" className="flex items-center gap-3">
+            <span className="relative flex h-10 w-10 items-center justify-center rounded-md bg-[#166534] text-xl font-black text-white shadow-sm">
+              F
+              <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-[#F59E0B]" />
+            </span>
+            <span>
+              <span className="block text-lg font-extrabold tracking-tight text-[#166534]">Lagos Food Hub</span>
+              <span className="block text-xs text-slate-500">Food Rescue Network</span>
+            </span>
           </Link>
           <button
             onClick={() => setOpen((prev) => !prev)}
-            className="rounded-md border border-green-300 px-3 py-1.5 text-sm font-semibold text-[#16A34A] md:hidden"
+            className="rounded-md border border-green-300 px-3 py-1.5 text-sm font-semibold text-[#166534] md:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
           >
@@ -32,7 +38,7 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16A34A] ${isActive ? "bg-green-100 text-[#15803D]" : "text-[#16A34A] hover:bg-green-50"}`}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#16A34A] ${isActive ? "bg-green-100 text-[#166534]" : "text-slate-700 hover:bg-green-50 hover:text-[#166534]"}`}
                   aria-current={isActive ? "page" : undefined}
                 >
                   {link.label}
@@ -42,7 +48,7 @@ export function Navbar() {
             <Link
               href="/notifications"
               aria-label="Notifications"
-              className="px-1 py-1 text-[#16A34A] transition hover:text-[#15803D]"
+              className="px-1 py-1 text-slate-700 transition hover:text-[#166534]"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +65,7 @@ export function Navbar() {
             </Link>
             <Link
               href="/login"
-              className="rounded-md border border-[#16A34A] px-3 py-1.5 text-sm font-medium text-[#16A34A] transition hover:bg-green-50"
+              className="rounded-md border border-[#16A34A] px-3 py-1.5 text-sm font-medium text-[#166534] transition hover:bg-green-50"
             >
               Login
             </Link>
@@ -80,7 +86,7 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`block rounded-md px-3 py-2 text-sm font-medium ${isActive ? "bg-green-100 text-[#15803D]" : "text-[#16A34A] hover:bg-green-50"}`}
+                  className={`block rounded-md px-3 py-2 text-sm font-medium ${isActive ? "bg-green-100 text-[#166534]" : "text-slate-700 hover:bg-green-50 hover:text-[#166534]"}`}
                   onClick={() => setOpen(false)}
                   aria-current={isActive ? "page" : undefined}
                 >
