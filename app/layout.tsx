@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Navbar } from "@/components/Navbar";
-import { Sidebar } from "@/components/Sidebar";
 
 export const metadata: Metadata = {
   title: "Lagos Food Hub",
@@ -15,15 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <div className="min-h-screen text-slate-900">
-          <Navbar />
-          <div className="md:flex">
-            <Sidebar />
-            <div className="min-w-0 flex-1">{children}</div>
-          </div>
-        </div>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
