@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { useAuthGuard } from "@/lib/use-auth-guard";
 
 const notifications = [
   { id: 1, title: "Donation match found", time: "5 mins ago", tone: "success" as const },
@@ -10,6 +13,9 @@ const notifications = [
 ];
 
 export default function NotificationsPage() {
+  const isLoggedIn = useAuthGuard();
+  if (!isLoggedIn) return null;
+
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
       <p className="text-sm text-slate-500">

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
+import { useAuthGuard } from "@/lib/use-auth-guard";
 
 type RequestForm = {
   householdSize: string;
@@ -22,9 +23,12 @@ const initialRequest: RequestForm = {
 };
 
 export default function BeneficiaryDashboard() {
+  const isLoggedIn = useAuthGuard();
   const [form, setForm] = useState<RequestForm>(initialRequest);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  if (!isLoggedIn) return null;
 
   function submitRequest(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

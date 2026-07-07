@@ -19,6 +19,7 @@ import {
   setProfile,
 } from "@/lib/ui-session";
 import { useActiveRole } from "@/lib/use-ui-session";
+import { useAuthGuard } from "@/lib/use-auth-guard";
 
 type NotificationPrefs = {
   emailNotifications: boolean;
@@ -29,6 +30,7 @@ type NotificationPrefs = {
 const roles = roleOptions.filter((role) => role.value !== "admin");
 
 export default function ProfilePage() {
+  const isLoggedIn = useAuthGuard();
   const router = useRouter();
   const activeRole = useActiveRole();
   const [form, setForm] = useState(() => getProfile());
@@ -83,6 +85,8 @@ export default function ProfilePage() {
     ],
   };
   const summaryRole = activeRole ?? selectedRole;
+
+  if (!isLoggedIn) return null;
 
   function onPhotoChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];

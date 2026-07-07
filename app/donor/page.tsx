@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
+import { useAuthGuard } from "@/lib/use-auth-guard";
 
 type DonorForm = {
   foodType: string;
@@ -24,10 +25,13 @@ const initialForm: DonorForm = {
 };
 
 export default function DonorDashboard() {
+  const isLoggedIn = useAuthGuard();
   const [form, setForm] = useState<DonorForm>(initialForm);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [openSuccess, setOpenSuccess] = useState(false);
+
+  if (!isLoggedIn) return null;
 
   function submitDonation(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();

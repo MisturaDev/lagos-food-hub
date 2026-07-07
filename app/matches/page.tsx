@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
+import { useAuthGuard } from "@/lib/use-auth-guard";
 
 type MatchStatus = "Ready" | "Needs volunteer" | "Scheduled";
 type Urgency = "High" | "Medium" | "Low";
@@ -91,10 +92,13 @@ const statusTone: Record<MatchStatus, "neutral" | "success" | "warning"> = {
 };
 
 export default function MatchesPage() {
+  const isLoggedIn = useAuthGuard();
   const [query, setQuery] = useState("");
   const [area, setArea] = useState("All areas");
   const [status, setStatus] = useState<(typeof statuses)[number]>("All statuses");
   const [selectedMatch, setSelectedMatch] = useState<FoodMatch | null>(null);
+
+  if (!isLoggedIn) return null;
 
   const filteredMatches = useMemo(() => {
     const search = query.trim().toLowerCase();
