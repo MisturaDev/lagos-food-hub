@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ACCOUNT_NAME_KEY, ACTIVE_ROLE_KEY, PROFILE_KEY } from "@/lib/ui-session";
+import { useActiveRole } from "@/lib/use-ui-session";
 
 type IconName =
   | "home"
@@ -12,7 +13,8 @@ type IconName =
   | "donor"
   | "beneficiary"
   | "volunteer"
-  | "profile";
+  | "profile"
+  | "logout";
 
 type NavItem = {
   href: string;
@@ -100,6 +102,17 @@ function SidebarIcon({ name }: { name: IconName }) {
     );
   }
 
+  if (name === "logout") {
+    return (
+      <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <path d="m16 17 5-5-5-5" />
+        <path d="M21 12H9" />
+      </svg>
+    );
+  }
+
+  // profile (default)
   return (
     <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
       <circle cx="12" cy="8" r="4" />
@@ -114,7 +127,9 @@ function NavSection({ title, items }: { title?: string; items: NavItem[] }) {
   return (
     <div>
       {title ? (
-        <p className="mb-2 hidden text-xs font-semibold uppercase tracking-wide text-slate-500 md:block">{title}</p>
+        <p className="mb-2 hidden text-xs font-semibold uppercase tracking-wide text-slate-500 md:block">
+          {title}
+        </p>
       ) : null}
       <div className="flex gap-2 overflow-x-auto md:block md:space-y-1 md:overflow-visible">
         {items.map((item) => {
@@ -142,6 +157,7 @@ function NavSection({ title, items }: { title?: string; items: NavItem[] }) {
 
 export function Sidebar() {
   const router = useRouter();
+  const activeRole = useActiveRole();
 
   function onLogout() {
     if (typeof window !== "undefined") {
@@ -154,22 +170,50 @@ export function Sidebar() {
 
   return (
     <aside className="border-b border-green-100 bg-white px-4 py-3 md:sticky md:top-[65px] md:min-h-[calc(100vh-65px)] md:w-72 md:shrink-0 md:border-b-0 md:border-r md:p-4">
-      <nav className="flex gap-3 overflow-x-auto md:block md:space-y-6 md:overflow-visible" aria-label="Sidebar navigation">
+      <nav
+        className="flex gap-3 overflow-x-auto md:block md:space-y-6 md:overflow-visible"
+        aria-label="Sidebar navigation"
+      >
         <NavSection items={mainNav} />
         <NavSection title="Workspaces" items={workspaces} />
         <NavSection title="Account" items={accountNav} />
+
+        {/* Mobile-only logout — sits inline with the nav row */}
+        <div className="flex shrink-0 items-center md:hidden">
+          <button
+            type="button"
+            onClick={onLogout}
+            className="flex shrink-0 items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50"
+            aria-label="Logout"
+          >
+            <SidebarIcon name="logout" />
+            <span>Logout</span>
+          </button>
+        </div>
       </nav>
 
+      {/* Desktop footer — unchanged */}
       <div className="mt-6 hidden border-t border-green-100 pt-4 md:block">
+        {activeRole && (
+          <div className="mb-3 rounded-md border border-green-100 bg-green-50 px-3 py-2">
+            <p className="text-xs text-slate-500">Active role</p>
+            <p className="text-sm font-bold text-[#166534]">
+              {activeRole.charAt(0).toUpperCase() + activeRole.slice(1)}
+            </p>
+          </div>
+        )}
         <div className="rounded-md border border-green-100 bg-green-50 p-3">
           <p className="text-xs font-semibold text-[#166534]">Food Rescue Network</p>
-          <p className="mt-1 text-xs leading-5 text-slate-600">Coordinate supply, need, and dispatch from one hub.</p>
+          <p className="mt-1 text-xs leading-5 text-slate-600">
+            Coordinate supply, need, and dispatch from one hub.
+          </p>
         </div>
         <button
           type="button"
           onClick={onLogout}
-          className="mt-3 w-full rounded-md border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50"
+          className="mt-3 flex w-full items-center gap-2 rounded-md border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50"
         >
+          <SidebarIcon name="logout" />
           Logout
         </button>
       </div>
