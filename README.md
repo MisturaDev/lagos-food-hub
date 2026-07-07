@@ -1,53 +1,58 @@
 # Lagos Food Hub
 
-Lagos Food Hub is a role-based food rescue and distribution platform built with **Next.js.**  
-The platform connects food donors, beneficiaries, volunteers and administrators to help reduce food waste and improve food accessibility across Lagos.
+Lagos Food Hub is a role-based food rescue and distribution platform built with **Next.js**, **TypeScript** and **Tailwind CSS**. It connects food donors, beneficiaries, volunteers, and administrators to streamline food donations, reduce waste and improve food accessibility across Lagos communities.
 
 ---
 
 ## Features
 
-### Authentication & Account System
-- Login and registration flow
-- Multi-role account architecture
+### Authentication & Role Management
+- User registration and login
+- Multi-role account support
 - Active role switching
-- Session-based dashboard access
+- Protected routes
+- Session-based authentication
 
-### Dashboard Experience
-- Central dashboard overview
-- Role-based workspace navigation
+### Dashboard 
+- Central dashboard
+- Role-based navigation
 - Notifications center
-- Profile and security management
+- Profile management
 
 ### Workspaces
 - Donor workspace
 - Beneficiary workspace
 - Volunteer workspace
-- Admin management workspace
+- Admin workspace
 
-### Responsive UI
-- Mobile-friendly dashboard layout
-- Sidebar drawer for mobile devices
-- Responsive navigation and cards
-
+### Responsive Experience
+- Mobile-friendly interface
+- Responsive navigation
+- Adaptive dashboard layout
+  
 ---
 
 ## Tech Stack
-- Next.js
+- Next.js (App Router)
 - TypeScript
 - Tailwind CSS
 
 ---
 
-## Future Improvements
+## Project Status
+
+Lagos Food Hub is currently under active development. Core authentication, role-based access, dashboards and workspace layouts have been implemented, with ongoing work focused on API integration, feature enhancements and user experience improvements.
+
+## Roadmap
+
+- API integration
 - Food donation management
-- Request approval system
-- Delivery assignment flow
+- Request approval workflow
+- Delivery assignment
 - Real-time notifications
 - Analytics dashboard
-- Maps and location support
+- Maps & location services
 - Image uploads
-- API/database integration
 
 
 ## Getting Started
@@ -70,5 +75,3 @@ The platform connects food donors, beneficiaries, volunteers and administrators 
 ## Project Vision
 
 Lagos Food Hub aims to build a scalable community-driven food rescue ecosystem that reduces food waste while improving support accessibility across Lagos communities.
-
-
