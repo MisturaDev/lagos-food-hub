@@ -12,24 +12,27 @@ export type ProfileState = {
   bio: string;
 };
 
+// ---------------------------------------------------------------------------
+// Internal helper — fires a same-tab notification so React hooks re-render.
+// Imported by use-ui-session.ts; also called here after each write.
+// ---------------------------------------------------------------------------
+function notify() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("lfh-session-change"));
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Readers
+// ---------------------------------------------------------------------------
 export function getActiveRole(): Role | null {
   if (typeof window === "undefined") return null;
   return (localStorage.getItem(ACTIVE_ROLE_KEY) as Role | null) ?? null;
 }
 
-export function setActiveRole(role: Role) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(ACTIVE_ROLE_KEY, role);
-}
-
 export function getAccountName() {
   if (typeof window === "undefined") return "User";
   return localStorage.getItem(ACCOUNT_NAME_KEY) || "User";
-}
-
-export function setAccountName(name: string) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(ACCOUNT_NAME_KEY, name.trim() || "User");
 }
 
 export function getProfile(): ProfileState {
@@ -54,7 +57,23 @@ export function getProfile(): ProfileState {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Writers — each one notifies listeners after writing
+// ---------------------------------------------------------------------------
+export function setActiveRole(role: Role) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(ACTIVE_ROLE_KEY, role);
+  notify();
+}
+
+export function setAccountName(name: string) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(ACCOUNT_NAME_KEY, name.trim() || "User");
+  notify();
+}
+
 export function setProfile(profile: ProfileState) {
   if (typeof window === "undefined") return;
   localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  notify();
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
-import { PROFILE_KEY, getAccountName, getActiveRole, ProfileState } from "@/lib/ui-session";
+import { ACCOUNT_NAME_KEY, ACTIVE_ROLE_KEY, PROFILE_KEY, ProfileState, getAccountName, getActiveRole } from "@/lib/ui-session";
 import { Role } from "@/lib/ui";
 
 const EMPTY_PROFILE: ProfileState = {
@@ -12,8 +12,22 @@ const EMPTY_PROFILE: ProfileState = {
   bio: "",
 };
 
-function subscribe() {
-  return () => {};
+// Dispatch a custom storage event so same-tab listeners are notified.
+// Call this wherever you write to localStorage (setActiveRole, setAccountName, setProfile).
+export function notifySessionChange() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("lfh-session-change"));
+  }
+}
+
+function subscribe(callback: () => void) {
+  // Listen for cross-tab storage events and same-tab custom events.
+  window.addEventListener("storage", callback);
+  window.addEventListener("lfh-session-change", callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener("lfh-session-change", callback);
+  };
 }
 
 export function useAccountName() {
@@ -49,4 +63,10 @@ export function useProfile() {
       return EMPTY_PROFILE;
     }
   }, [raw]);
+}
+
+// Convenience: check whether a session exists (account name has been set).
+export function useIsLoggedIn() {
+  const name = useAccountName();
+  return name !== "User" && name !== "";
 }
