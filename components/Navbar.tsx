@@ -1,11 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { useIsLoggedIn, useAccountName } from "@/lib/use-ui-session";
 
 export function Navbar() {
+  const isLoggedIn = useIsLoggedIn();
+  const accountName = useAccountName();
+
   return (
     <header className="sticky top-0 z-40 border-b border-green-100 bg-white/95 backdrop-blur">
       <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3" aria-label="Top bar">
+        {/* Logo */}
         <Link href="/" className="flex min-w-0 items-center gap-3">
           <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#166534] text-xl font-black text-white shadow-sm">
             F
@@ -19,6 +24,7 @@ export function Navbar() {
           </span>
         </Link>
 
+        {/* Search */}
         <div className="hidden min-w-0 max-w-md flex-1 items-center rounded-md border border-slate-200 bg-white px-3 py-2 shadow-sm lg:flex">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -40,19 +46,37 @@ export function Navbar() {
           />
         </div>
 
+        {/* Auth actions */}
         <div className="flex items-center gap-2">
-          <Link
-            href="/login"
-            className="hidden rounded-md border border-green-200 px-3 py-2 text-sm font-semibold text-[#166534] transition hover:bg-green-50 sm:inline-flex"
-          >
-            Login
-          </Link>
-          <Link
-            href="/register"
-            className="rounded-md bg-[#16A34A] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#15803D]"
-          >
-            Register
-          </Link>
+          {isLoggedIn ? (
+            <>
+              {/* Greeting — hidden on small screens */}
+              <span className="hidden text-sm font-semibold text-slate-700 sm:inline">
+                Hi, {accountName}
+              </span>
+              <Link
+                href="/dashboard"
+                className="rounded-md bg-[#16A34A] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#15803D]"
+              >
+                Dashboard
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="hidden rounded-md border border-green-200 px-3 py-2 text-sm font-semibold text-[#166534] transition hover:bg-green-50 sm:inline-flex"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="rounded-md bg-[#16A34A] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#15803D]"
+              >
+                Register
+              </Link>
+            </>
+          )}
         </div>
       </nav>
     </header>
