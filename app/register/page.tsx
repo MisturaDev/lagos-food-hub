@@ -52,8 +52,8 @@ export default function RegisterPage() {
     setLoading(true);
     setTimeout(() => {
       setAccountName(form.name.trim().split(/\s+/)[0] || "User");
-      router.push("/dashboard");
-      router.refresh();
+      // Send new users to choose-role so they pick a workspace before landing on the dashboard.
+      router.push("/choose-role");
       setLoading(false);
     }, 500);
   }

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Role } from "@/lib/ui";
 import { useAccountName, useActiveRole } from "@/lib/use-ui-session";
+import { useAuthGuard } from "@/lib/use-auth-guard";
 
 const roleStats: Record<Role, Array<{ label: string; value: string }>> = {
   donor: [
@@ -22,7 +23,11 @@ const roleStats: Record<Role, Array<{ label: string; value: string }>> = {
     { label: "Active Deliveries", value: "4" },
     { label: "Communities Helped", value: "9" },
   ],
-  admin: [],
+  admin: [
+    { label: "Pending Approvals", value: "12" },
+    { label: "Active Volunteers", value: "34" },
+    { label: "Scheduled Pickups", value: "9" },
+  ],
 };
 
 const roleActivity: Record<Role, string[]> = {
@@ -41,24 +46,55 @@ const roleActivity: Record<Role, string[]> = {
     "Drop-off completed for community kitchen.",
     "Dispatch update received from donor team.",
   ],
-  admin: [],
+  admin: [
+    "Donor profile in Ikeja submitted for review.",
+    "Volunteer team assigned to Surulere route.",
+    "Beneficiary request marked high urgency.",
+  ],
 };
 
-const roleActionHref: Record<Role, string> = {
-  donor: "/donor",
-  beneficiary: "/beneficiary",
-  volunteer: "/volunteer",
-  admin: "/admin",
+type QuickAction = { href: string; label: string; variant: "primary" | "secondary" | "ghost" };
+
+// Each role gets a focused, relevant set of actions.
+const roleQuickActions: Record<Role, QuickAction[]> = {
+  donor: [
+    { href: "/donor", label: "Create Donation", variant: "primary" },
+    { href: "/matches", label: "View Matches", variant: "secondary" },
+    { href: "/choose-role", label: "Switch Role", variant: "ghost" },
+    { href: "/profile", label: "Edit Profile", variant: "ghost" },
+  ],
+  beneficiary: [
+    { href: "/beneficiary", label: "Request Food", variant: "primary" },
+    { href: "/matches", label: "View Matches", variant: "secondary" },
+    { href: "/choose-role", label: "Switch Role", variant: "ghost" },
+    { href: "/profile", label: "Edit Profile", variant: "ghost" },
+  ],
+  volunteer: [
+    { href: "/volunteer", label: "View Deliveries", variant: "primary" },
+    { href: "/matches", label: "Match Center", variant: "secondary" },
+    { href: "/choose-role", label: "Switch Role", variant: "ghost" },
+    { href: "/profile", label: "Edit Profile", variant: "ghost" },
+  ],
+  admin: [
+    { href: "/admin", label: "Admin Panel", variant: "primary" },
+    { href: "/matches", label: "Match Center", variant: "secondary" },
+    { href: "/volunteer", label: "Dispatch Board", variant: "secondary" },
+    { href: "/profile", label: "Edit Profile", variant: "ghost" },
+  ],
 };
 
 export default function DashboardPage() {
+  const isLoggedIn = useAuthGuard();
   const activeRole = (useActiveRole() ?? "donor") as Role;
   const accountName = useAccountName();
-  const firstName = accountName || "User";
 
-  const titleRole = activeRole[0].toUpperCase() + activeRole.slice(1);
-  const actionLabel =
-    activeRole === "donor" ? "Create Donation" : activeRole === "beneficiary" ? "Request Food" : "View Deliveries";
+  if (!isLoggedIn) return null;
+  const firstName = accountName || "User";
+  const titleRole = activeRole.charAt(0).toUpperCase() + activeRole.slice(1);
+
+  const quickActions = roleQuickActions[activeRole];
+  const stats = roleStats[activeRole];
+  const activity = roleActivity[activeRole];
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
@@ -69,56 +105,53 @@ export default function DashboardPage() {
         / <span className="font-semibold text-slate-700">Dashboard</span>
       </p>
 
+      {/* Welcome banner */}
       <section className="mt-4 rounded-2xl border border-green-100 bg-gradient-to-br from-white via-green-50 to-lime-50 p-8 shadow-sm">
         <h1 className="text-3xl font-black tracking-tight text-[#166534] md:text-4xl">
           Welcome back, {firstName}
         </h1>
-        <p className="mt-2 text-sm font-semibold text-slate-700 md:text-base">Active Role: {titleRole}</p>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <p className="text-sm font-semibold text-slate-700">Active Role: {titleRole}</p>
+          <Link
+            href="/choose-role"
+            className="rounded-full border border-green-200 px-3 py-0.5 text-xs font-semibold text-[#166534] transition hover:bg-green-100"
+          >
+            Switch role
+          </Link>
+        </div>
       </section>
 
-      <section className="mt-4 grid gap-4 md:grid-cols-3">
-        {roleStats[activeRole].map((item) => (
-          <Card key={item.label} title={item.value} description={item.label}>
-            <span className="text-xs text-slate-500">Role-based metric</span>
-          </Card>
-        ))}
-      </section>
+      {/* Stats */}
+      {stats.length > 0 && (
+        <section className="mt-4 grid gap-4 md:grid-cols-3">
+          {stats.map((item) => (
+            <Card key={item.label} title={item.value} description={item.label}>
+              <span className="text-xs text-slate-500">Role-based metric</span>
+            </Card>
+          ))}
+        </section>
+      )}
 
+      {/* Quick Actions + Recent Activity */}
       <section className="mt-4 grid gap-4 lg:grid-cols-2">
         <div className="max-w-2xl">
           <Card title="Quick Actions">
             <div className="grid gap-2 sm:grid-cols-2">
-              <Link href={roleActionHref[activeRole]}>
-                <Button className="w-full px-3 py-1.5 text-xs">{actionLabel}</Button>
-              </Link>
-              <Link href="/matches">
-                <Button variant="secondary" className="w-full px-3 py-1.5 text-xs">
-                  Find Matches
-                </Button>
-              </Link>
-              <Link href="/beneficiary">
-                <Button variant="secondary" className="w-full px-3 py-1.5 text-xs">
-                  Request Food
-                </Button>
-              </Link>
-              <Link href="/volunteer">
-                <Button variant="secondary" className="w-full px-3 py-1.5 text-xs">
-                  View Deliveries
-                </Button>
-              </Link>
-              <Link href="/profile">
-                <Button variant="ghost" className="w-full px-3 py-1.5 text-xs">
-                  Edit Profile
-                </Button>
-              </Link>
+              {quickActions.map((action) => (
+                <Link key={action.href + action.label} href={action.href}>
+                  <Button variant={action.variant} className="w-full px-3 py-1.5 text-xs">
+                    {action.label}
+                  </Button>
+                </Link>
+              ))}
             </div>
           </Card>
         </div>
 
         <div className="max-w-2xl">
-          <Card title="Recent Activity" description="Recent donations, requests, and deliveries">
+          <Card title="Recent Activity" description={`Latest ${titleRole} activity`}>
             <ul className="space-y-2 text-sm text-slate-700">
-              {roleActivity[activeRole].map((item) => (
+              {activity.map((item) => (
                 <li key={item} className="rounded-md border border-green-100 bg-green-50 px-3 py-1.5">
                   {item}
                 </li>
