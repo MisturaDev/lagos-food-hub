@@ -2,18 +2,23 @@
 
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { claimTask, completeTask, type TaskStatus } from "@/lib/mock-store";
+import { useHubStore } from "@/lib/use-mock-store";
 import { useAuthGuard } from "@/lib/use-auth-guard";
 
-const columns = [
-  { title: "Available", tone: "success" as const, count: 2 },
-  { title: "In Progress", tone: "warning" as const, count: 1 },
-  { title: "Completed", tone: "neutral" as const, count: 0 },
+const columns: Array<{ title: string; status: TaskStatus; tone: "success" | "warning" | "neutral" }> = [
+  { title: "Available", status: "available", tone: "success" },
+  { title: "In Progress", status: "in_progress", tone: "warning" },
+  { title: "Completed", status: "completed", tone: "neutral" },
 ];
 
 export default function VolunteerDashboard() {
   const isLoggedIn = useAuthGuard();
+  const store = useHubStore();
+
   if (!isLoggedIn) return null;
 
   return (
@@ -27,40 +32,61 @@ export default function VolunteerDashboard() {
       <section className="mt-4">
         <h1 className="text-2xl font-black text-[#166534]">Task Board</h1>
         <p className="mt-1 text-sm text-slate-600">
-          Coordinate pickup and drop-off assignments with clear workflow states.
+          Claim pickups, move them through transit, and mark handoffs complete.
         </p>
       </section>
       <section className="mt-5 grid gap-4 md:grid-cols-3">
-        {columns.map((column) => (
-          <Card
-            key={column.title}
-            title={column.title}
-            description={`${column.count} task${column.count === 1 ? "" : "s"}`}
-          >
-            <div className="mb-3">
-              <Badge tone={column.tone}>{column.count} active</Badge>
-            </div>
-            {column.title === "Completed" ? (
-              <EmptyState
-                title="No completed tasks yet"
-                message="Completed pickups and deliveries will be listed here."
-              />
-            ) : (
-              <div className="space-y-2">
-                <div className="rounded-lg border border-green-100 bg-green-50 p-3 text-sm text-slate-700">
-                  Surulere pickup - 80 meal packs
-                </div>
-                {column.title === "Available" ? (
-                  <div className="rounded-lg border border-green-100 bg-green-50 p-3 text-sm text-slate-700">
-                    Yaba dispatch - produce basket collection
-                  </div>
-                ) : null}
+        {columns.map((column) => {
+          const tasks = store.tasks.filter((task) => task.status === column.status);
+          return (
+            <Card
+              key={column.title}
+              title={column.title}
+              description={`${tasks.length} task${tasks.length === 1 ? "" : "s"}`}
+            >
+              <div className="mb-3">
+                <Badge tone={column.tone}>{tasks.length} active</Badge>
               </div>
-            )}
-          </Card>
-        ))}
+              {tasks.length === 0 ? (
+                <EmptyState
+                  title={`No ${column.title.toLowerCase()} tasks`}
+                  message="Tasks will appear here as matches are dispatched."
+                />
+              ) : (
+                <div className="space-y-2">
+                  {tasks.map((task) => (
+                    <div
+                      key={task.id}
+                      className="rounded-lg border border-green-100 bg-green-50 p-3 text-sm text-slate-700"
+                    >
+                      <p className="font-semibold text-slate-800">{task.title}</p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {task.area} · {task.quantity}
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {task.status === "available" ? (
+                          <Button type="button" className="px-3 py-1.5 text-xs" onClick={() => claimTask(task.id)}>
+                            Claim task
+                          </Button>
+                        ) : null}
+                        {task.status === "in_progress" ? (
+                          <Button
+                            type="button"
+                            className="px-3 py-1.5 text-xs"
+                            onClick={() => completeTask(task.id)}
+                          >
+                            Mark completed
+                          </Button>
+                        ) : null}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          );
+        })}
       </section>
     </main>
   );
 }
-
