@@ -2,19 +2,20 @@
 
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { markAllNotificationsRead, markNotificationRead } from "@/lib/mock-store";
+import { useHubStore } from "@/lib/use-mock-store";
 import { useAuthGuard } from "@/lib/use-auth-guard";
-
-const notifications = [
-  { id: 1, title: "Donation match found", time: "5 mins ago", tone: "success" as const },
-  { id: 2, title: "Volunteer task updated", time: "21 mins ago", tone: "neutral" as const },
-  { id: 3, title: "Reminder: Complete profile", time: "1 hour ago", tone: "warning" as const },
-];
 
 export default function NotificationsPage() {
   const isLoggedIn = useAuthGuard();
+  const store = useHubStore();
+
   if (!isLoggedIn) return null;
+
+  const unreadCount = store.notifications.filter((item) => !item.read).length;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
@@ -25,31 +26,57 @@ export default function NotificationsPage() {
         / <span className="font-semibold text-slate-700">Notifications</span>
       </p>
 
-      <section className="mt-4 grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <Card title="Notification Center" description="Latest updates from your workspace">
+      <section className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-black text-[#166534]">Notification Center</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            {unreadCount} unread update{unreadCount === 1 ? "" : "s"} from your workspace.
+          </p>
+        </div>
+        {store.notifications.length > 0 ? (
+          <Button type="button" variant="secondary" onClick={() => markAllNotificationsRead()}>
+            Mark all read
+          </Button>
+        ) : null}
+      </section>
+
+      <section className="mt-5">
+        <Card title="Latest updates" description="Approvals, matches, and dispatch activity">
+          {store.notifications.length === 0 ? (
+            <EmptyState
+              title="No new notifications"
+              message="New alerts, reminders, and activity updates will appear here."
+            />
+          ) : (
             <div className="space-y-3">
-              {notifications.map((item) => (
+              {store.notifications.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between rounded-md border border-green-100 bg-white px-3 py-2"
+                  className={`flex flex-wrap items-center justify-between gap-3 rounded-md border px-3 py-2 ${
+                    item.read ? "border-green-100 bg-white" : "border-green-200 bg-green-50"
+                  }`}
                 >
                   <div>
                     <p className="text-sm font-semibold text-slate-800">{item.title}</p>
                     <p className="text-xs text-slate-500">{item.time}</p>
                   </div>
-                  <Badge tone={item.tone}>{item.tone === "neutral" ? "Info" : item.tone}</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge tone={item.tone}>{item.read ? "Read" : item.tone === "neutral" ? "Info" : item.tone}</Badge>
+                    {!item.read ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="px-2 py-1 text-xs"
+                        onClick={() => markNotificationRead(item.id)}
+                      >
+                        Mark read
+                      </Button>
+                    ) : null}
+                  </div>
                 </div>
               ))}
             </div>
-          </Card>
-        </div>
-
-        <Card title="Empty State" description="For users with no updates">
-          <EmptyState
-            title="No new notifications"
-            message="New alerts, reminders, and activity updates will appear here."
-          />
+          )}
         </Card>
       </section>
     </main>

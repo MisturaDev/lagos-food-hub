@@ -5,79 +5,12 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
+import { updateMatchStatus, type FoodMatch, type MatchStatus, type Urgency } from "@/lib/mock-store";
+import { useHubStore } from "@/lib/use-mock-store";
 import { useAuthGuard } from "@/lib/use-auth-guard";
-
-type MatchStatus = "Ready" | "Needs volunteer" | "Scheduled";
-type Urgency = "High" | "Medium" | "Low";
-
-type FoodMatch = {
-  id: string;
-  donor: string;
-  food: string;
-  quantity: string;
-  area: string;
-  pickupWindow: string;
-  beneficiary: string;
-  urgency: Urgency;
-  status: MatchStatus;
-  route: string;
-};
-
-const matches: FoodMatch[] = [
-  {
-    id: "LFH-1024",
-    donor: "Mainland Kitchen",
-    food: "Cooked jollof rice packs",
-    quantity: "120 meals",
-    area: "Surulere",
-    pickupWindow: "Today, 4:00 PM - 6:00 PM",
-    beneficiary: "Aguda Community Pantry",
-    urgency: "High",
-    status: "Needs volunteer",
-    route: "Surulere -> Aguda",
-  },
-  {
-    id: "LFH-1025",
-    donor: "Yaba Grocers",
-    food: "Fresh produce baskets",
-    quantity: "35 baskets",
-    area: "Yaba",
-    pickupWindow: "Tomorrow, 9:00 AM - 11:00 AM",
-    beneficiary: "Makoko Women Collective",
-    urgency: "Medium",
-    status: "Ready",
-    route: "Yaba -> Makoko",
-  },
-  {
-    id: "LFH-1026",
-    donor: "Lekki Events",
-    food: "Packaged pastries and drinks",
-    quantity: "80 packs",
-    area: "Lekki",
-    pickupWindow: "Friday, 2:00 PM - 3:30 PM",
-    beneficiary: "Ajah Youth Centre",
-    urgency: "Low",
-    status: "Scheduled",
-    route: "Lekki -> Ajah",
-  },
-  {
-    id: "LFH-1027",
-    donor: "Ikeja Canteen",
-    food: "Beans, rice, and stew bowls",
-    quantity: "95 meals",
-    area: "Ikeja",
-    pickupWindow: "Today, 5:30 PM - 7:00 PM",
-    beneficiary: "Agege Relief Desk",
-    urgency: "High",
-    status: "Ready",
-    route: "Ikeja -> Agege",
-  },
-];
-
-const areas = ["All areas", ...Array.from(new Set(matches.map((match) => match.area)))];
-const statuses: Array<"All statuses" | MatchStatus> = ["All statuses", "Ready", "Needs volunteer", "Scheduled"];
 
 const urgencyTone: Record<Urgency, "neutral" | "success" | "warning"> = {
   High: "warning",
@@ -89,21 +22,34 @@ const statusTone: Record<MatchStatus, "neutral" | "success" | "warning"> = {
   Ready: "success",
   "Needs volunteer": "warning",
   Scheduled: "neutral",
+  Completed: "success",
 };
+
+const statuses: Array<"All statuses" | MatchStatus> = [
+  "All statuses",
+  "Ready",
+  "Needs volunteer",
+  "Scheduled",
+  "Completed",
+];
 
 export default function MatchesPage() {
   const isLoggedIn = useAuthGuard();
+  const store = useHubStore();
   const [query, setQuery] = useState("");
   const [area, setArea] = useState("All areas");
   const [status, setStatus] = useState<(typeof statuses)[number]>("All statuses");
   const [selectedMatch, setSelectedMatch] = useState<FoodMatch | null>(null);
 
-  if (!isLoggedIn) return null;
+  const areas = useMemo(
+    () => ["All areas", ...Array.from(new Set(store.matches.map((match) => match.area)))],
+    [store.matches],
+  );
 
   const filteredMatches = useMemo(() => {
     const search = query.trim().toLowerCase();
 
-    return matches.filter((match) => {
+    return store.matches.filter((match) => {
       const matchesSearch =
         !search ||
         [match.id, match.donor, match.food, match.beneficiary, match.area, match.route]
@@ -115,10 +61,12 @@ export default function MatchesPage() {
 
       return matchesSearch && matchesArea && matchesStatus;
     });
-  }, [area, query, status]);
+  }, [area, query, status, store.matches]);
 
-  const highUrgencyCount = matches.filter((match) => match.urgency === "High").length;
-  const volunteerNeededCount = matches.filter((match) => match.status === "Needs volunteer").length;
+  if (!isLoggedIn) return null;
+
+  const highUrgencyCount = store.matches.filter((match) => match.urgency === "High").length;
+  const volunteerNeededCount = store.matches.filter((match) => match.status === "Needs volunteer").length;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
@@ -137,7 +85,7 @@ export default function MatchesPage() {
       </section>
 
       <section className="mt-5 grid gap-4 md:grid-cols-3">
-        <Card title={String(matches.length)} description="Open matches">
+        <Card title={String(store.matches.length)} description="Open matches">
           <Badge tone="success">Citywide queue</Badge>
         </Card>
         <Card title={String(highUrgencyCount)} description="High urgency">
@@ -235,8 +183,11 @@ export default function MatchesPage() {
       </section>
 
       {filteredMatches.length === 0 ? (
-        <section className="mt-5 rounded-xl border border-green-100 bg-white p-6 text-sm text-slate-600 shadow-sm">
-          No matches found for the current filters.
+        <section className="mt-5">
+          <EmptyState
+            title="No matches found"
+            message="Try a different area, status, or search term."
+          />
         </section>
       ) : null}
 
@@ -244,15 +195,44 @@ export default function MatchesPage() {
         {selectedMatch ? (
           <div className="space-y-3 text-sm text-slate-700">
             <p>
-              <span className="font-semibold text-slate-900">{selectedMatch.id}</span> is ready for route planning.
+              <span className="font-semibold text-slate-900">{selectedMatch.id}</span> is ready for route
+              planning.
             </p>
             <div className="rounded-lg border border-green-100 bg-green-50 p-3">
               <p className="font-semibold text-[#166534]">{selectedMatch.route}</p>
               <p className="mt-1">{selectedMatch.pickupWindow}</p>
             </div>
-            <Button type="button" className="w-full" onClick={() => setSelectedMatch(null)}>
-              Mark Coordination Started
-            </Button>
+            <div className="grid gap-2">
+              <Button
+                type="button"
+                onClick={() => {
+                  updateMatchStatus(selectedMatch.id, "Needs volunteer");
+                  setSelectedMatch(null);
+                }}
+              >
+                Request volunteer
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  updateMatchStatus(selectedMatch.id, "Scheduled");
+                  setSelectedMatch(null);
+                }}
+              >
+                Mark scheduled
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  updateMatchStatus(selectedMatch.id, "Completed");
+                  setSelectedMatch(null);
+                }}
+              >
+                Mark completed
+              </Button>
+            </div>
           </div>
         ) : null}
       </Modal>
