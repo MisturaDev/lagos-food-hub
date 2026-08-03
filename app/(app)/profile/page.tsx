@@ -27,7 +27,7 @@ type NotificationPrefs = {
   updates: boolean;
 };
 
-const roles = roleOptions.filter((role) => role.value !== "admin");
+const roles = roleOptions;
 
 export default function ProfilePage() {
   const isLoggedIn = useAuthGuard();

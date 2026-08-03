@@ -35,8 +35,6 @@ const roleIcons: Record<Role, React.ReactNode> = {
   ),
 };
 
-const publicRoles = roleOptions.filter((r) => r.value !== "admin");
-
 export default function ChooseRolePage() {
   const isLoggedIn = useAuthGuard();
   const router = useRouter();
@@ -72,8 +70,8 @@ export default function ChooseRolePage() {
         </p>
       </section>
 
-      <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Role options">
-        {publicRoles.map((role) => {
+      <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Role options">
+        {roleOptions.map((role) => {
           const isSelected = selected === role.value;
           return (
             <button

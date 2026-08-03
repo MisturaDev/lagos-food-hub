@@ -13,6 +13,7 @@ type IconName =
   | "donor"
   | "beneficiary"
   | "volunteer"
+  | "admin"
   | "profile"
   | "logout";
 
@@ -33,9 +34,18 @@ const workspaces: NavItem[] = [
   { href: "/donor", label: "Donor", icon: "donor" },
   { href: "/beneficiary", label: "Beneficiary", icon: "beneficiary" },
   { href: "/volunteer", label: "Volunteer", icon: "volunteer" },
+  { href: "/admin", label: "Admin", icon: "admin" },
 ];
 
 const accountNav: NavItem[] = [{ href: "/profile", label: "Profile", icon: "profile" }];
+
+function workspacesForRole(role: string | null) {
+  if (role === "admin") return workspaces;
+  if (role === "donor") return workspaces.filter((item) => item.href === "/donor");
+  if (role === "beneficiary") return workspaces.filter((item) => item.href === "/beneficiary");
+  if (role === "volunteer") return workspaces.filter((item) => item.href === "/volunteer");
+  return workspaces.filter((item) => item.href !== "/admin");
+}
 
 function SidebarIcon({ name }: { name: IconName }) {
   const common = "h-4 w-4";
@@ -102,6 +112,14 @@ function SidebarIcon({ name }: { name: IconName }) {
     );
   }
 
+  if (name === "admin") {
+    return (
+      <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" />
+      </svg>
+    );
+  }
+
   if (name === "logout") {
     return (
       <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -158,6 +176,7 @@ function NavSection({ title, items }: { title?: string; items: NavItem[] }) {
 export function Sidebar() {
   const router = useRouter();
   const activeRole = useActiveRole();
+  const roleWorkspaces = workspacesForRole(activeRole);
 
   function onLogout() {
     if (typeof window !== "undefined") {
@@ -175,7 +194,7 @@ export function Sidebar() {
         aria-label="Sidebar navigation"
       >
         <NavSection items={mainNav} />
-        <NavSection title="Workspaces" items={workspaces} />
+        <NavSection title="Workspaces" items={roleWorkspaces} />
         <NavSection title="Account" items={accountNav} />
 
         {/* Mobile-only logout — sits inline with the nav row */}

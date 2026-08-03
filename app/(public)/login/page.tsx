@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { setAccountName } from "@/lib/ui-session";
+import { getActiveRole, setAccountName } from "@/lib/ui-session";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function LoginPage() {
     setLoading(true);
     setTimeout(() => {
       setAccountName(email.split("@")[0] || "User");
-      router.push("/dashboard");
+      router.push(getActiveRole() ? "/dashboard" : "/choose-role");
       router.refresh();
       setLoading(false);
     }, 500);
