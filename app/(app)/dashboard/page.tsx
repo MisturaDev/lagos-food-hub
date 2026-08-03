@@ -3,55 +3,11 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { Role } from "@/lib/ui";
 import { useAccountName, useActiveRole } from "@/lib/use-ui-session";
+import { useHubStore } from "@/lib/use-mock-store";
 import { useAuthGuard } from "@/lib/use-auth-guard";
-
-const roleStats: Record<Role, Array<{ label: string; value: string }>> = {
-  donor: [
-    { label: "Total Donations", value: "18" },
-    { label: "Active Donations", value: "3" },
-    { label: "Meals Shared", value: "740" },
-  ],
-  beneficiary: [
-    { label: "Active Requests", value: "2" },
-    { label: "Support Received", value: "8" },
-    { label: "Requests Made", value: "11" },
-  ],
-  volunteer: [
-    { label: "Completed Deliveries", value: "27" },
-    { label: "Active Deliveries", value: "4" },
-    { label: "Communities Helped", value: "9" },
-  ],
-  admin: [
-    { label: "Pending Approvals", value: "12" },
-    { label: "Active Volunteers", value: "34" },
-    { label: "Scheduled Pickups", value: "9" },
-  ],
-};
-
-const roleActivity: Record<Role, string[]> = {
-  donor: [
-    "New donation created for Surulere pickup.",
-    "Donation quantity updated for Yaba route.",
-    "Beneficiary match approved for Lekki delivery.",
-  ],
-  beneficiary: [
-    "Support request submitted successfully.",
-    "Request status changed to Matched.",
-    "Pickup reminder sent for today 4:00 PM.",
-  ],
-  volunteer: [
-    "Delivery task assigned for Ikeja route.",
-    "Drop-off completed for community kitchen.",
-    "Dispatch update received from donor team.",
-  ],
-  admin: [
-    "Donor profile in Ikeja submitted for review.",
-    "Volunteer team assigned to Surulere route.",
-    "Beneficiary request marked high urgency.",
-  ],
-};
 
 type QuickAction = { href: string; label: string; variant: "primary" | "secondary" | "ghost" };
 
@@ -86,19 +42,76 @@ export default function DashboardPage() {
   const isLoggedIn = useAuthGuard();
   const activeRole = (useActiveRole() ?? "donor") as Role;
   const accountName = useAccountName();
+  const store = useHubStore();
 
   if (!isLoggedIn) return null;
 
   const firstName = accountName || "User";
   const titleRole = activeRole.charAt(0).toUpperCase() + activeRole.slice(1);
   const quickActions = roleQuickActions[activeRole];
-  const stats = roleStats[activeRole];
-  const activity = roleActivity[activeRole];
+
+  const statsByRole: Record<Role, Array<{ label: string; value: string }>> = {
+    donor: [
+      { label: "Total Donations", value: String(store.donations.length) },
+      {
+        label: "Active Donations",
+        value: String(store.donations.filter((item) => item.status === "pending" || item.status === "approved").length),
+      },
+      {
+        label: "Approved Offers",
+        value: String(store.donations.filter((item) => item.status === "approved" || item.status === "matched").length),
+      },
+    ],
+    beneficiary: [
+      {
+        label: "Active Requests",
+        value: String(store.requests.filter((item) => item.status === "pending" || item.status === "approved").length),
+      },
+      {
+        label: "Support Received",
+        value: String(store.requests.filter((item) => item.status === "fulfilled" || item.status === "matched").length),
+      },
+      { label: "Requests Made", value: String(store.requests.length) },
+    ],
+    volunteer: [
+      {
+        label: "Completed Deliveries",
+        value: String(store.tasks.filter((item) => item.status === "completed").length),
+      },
+      {
+        label: "Active Deliveries",
+        value: String(store.tasks.filter((item) => item.status === "in_progress").length),
+      },
+      {
+        label: "Available Tasks",
+        value: String(store.tasks.filter((item) => item.status === "available").length),
+      },
+    ],
+    admin: [
+      {
+        label: "Pending Approvals",
+        value: String(store.approvals.filter((item) => item.status === "pending").length),
+      },
+      {
+        label: "Active Volunteers",
+        value: String(store.tasks.filter((item) => item.status === "in_progress").length),
+      },
+      {
+        label: "Scheduled Pickups",
+        value: String(store.matches.filter((item) => item.status === "Scheduled").length),
+      },
+    ],
+  };
+
+  const activity = store.notifications.slice(0, 5).map((item) => item.title);
+  const stats = statsByRole[activeRole];
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
       <p className="text-sm text-slate-500">
-        <Link href="/" className="hover:text-[#16A34A]">Home</Link>{" "}
+        <Link href="/" className="hover:text-[#16A34A]">
+          Home
+        </Link>{" "}
         / <span className="font-semibold text-slate-700">Dashboard</span>
       </p>
 
@@ -117,15 +130,13 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {stats.length > 0 && (
-        <section className="mt-4 grid gap-4 md:grid-cols-3">
-          {stats.map((item) => (
-            <Card key={item.label} title={item.value} description={item.label}>
-              <span className="text-xs text-slate-500">Role-based metric</span>
-            </Card>
-          ))}
-        </section>
-      )}
+      <section className="mt-4 grid gap-4 md:grid-cols-3">
+        {stats.map((item) => (
+          <Card key={item.label} title={item.value} description={item.label}>
+            <span className="text-xs text-slate-500">Live demo metric</span>
+          </Card>
+        ))}
+      </section>
 
       <section className="mt-4 grid gap-4 lg:grid-cols-2">
         <div className="max-w-2xl">
@@ -143,13 +154,17 @@ export default function DashboardPage() {
         </div>
         <div className="max-w-2xl">
           <Card title="Recent Activity" description={`Latest ${titleRole} activity`}>
-            <ul className="space-y-2 text-sm text-slate-700">
-              {activity.map((item) => (
-                <li key={item} className="rounded-md border border-green-100 bg-green-50 px-3 py-1.5">
-                  {item}
-                </li>
-              ))}
-            </ul>
+            {activity.length === 0 ? (
+              <EmptyState title="No activity yet" message="Actions across the hub will show up here." />
+            ) : (
+              <ul className="space-y-2 text-sm text-slate-700">
+                {activity.map((item) => (
+                  <li key={item} className="rounded-md border border-green-100 bg-green-50 px-3 py-1.5">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            )}
           </Card>
         </div>
       </section>
