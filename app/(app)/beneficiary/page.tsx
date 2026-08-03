@@ -2,15 +2,24 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
+import {
+  capitalizeStatus,
+  createSupportRequest,
+  type RequestStatus,
+  type Urgency,
+} from "@/lib/mock-store";
+import { useAccountName } from "@/lib/use-ui-session";
+import { useHubStore } from "@/lib/use-mock-store";
 import { useAuthGuard } from "@/lib/use-auth-guard";
 
 type RequestForm = {
   householdSize: string;
-  urgency: string;
+  urgency: "" | Urgency;
   dietaryNotes: string;
   pickupArea: string;
 };
@@ -22,13 +31,26 @@ const initialRequest: RequestForm = {
   pickupArea: "",
 };
 
+const statusTone: Record<RequestStatus, "neutral" | "success" | "warning"> = {
+  pending: "warning",
+  approved: "success",
+  matched: "success",
+  rejected: "neutral",
+  fulfilled: "success",
+};
+
 export default function BeneficiaryDashboard() {
   const isLoggedIn = useAuthGuard();
+  const accountName = useAccountName();
+  const store = useHubStore();
   const [form, setForm] = useState<RequestForm>(initialRequest);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   if (!isLoggedIn) return null;
+
+  const myRequests = store.requests;
+  const openMatches = store.matches.filter((match) => match.status !== "Completed");
 
   function submitRequest(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -40,7 +62,14 @@ export default function BeneficiaryDashboard() {
       return;
     }
 
-    setSuccess("Request draft captured successfully in this UI-only flow.");
+    createSupportRequest({
+      householdSize: form.householdSize,
+      urgency: form.urgency,
+      dietaryNotes: form.dietaryNotes,
+      pickupArea: form.pickupArea,
+      beneficiaryName: accountName || "Beneficiary",
+    });
+    setSuccess("Request saved and sent to the admin approval queue.");
     setForm(initialRequest);
   }
 
@@ -52,6 +81,7 @@ export default function BeneficiaryDashboard() {
         </Link>{" "}
         / <span className="font-semibold text-slate-700">Beneficiary Dashboard</span>
       </p>
+
       <section className="mt-4 grid gap-5 md:grid-cols-3">
         <div className="md:col-span-2">
           <Card title="Create Support Request" description="Share your needs for better matching.">
@@ -72,12 +102,14 @@ export default function BeneficiaryDashboard() {
                     id="urgency"
                     className="w-full rounded-md border border-green-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:ring-2 focus-visible:ring-[#16A34A]"
                     value={form.urgency}
-                    onChange={(e) => setForm((prev) => ({ ...prev, urgency: e.target.value }))}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, urgency: e.target.value as RequestForm["urgency"] }))
+                    }
                   >
                     <option value="">Select urgency</option>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
                   </select>
                 </div>
               </div>
@@ -116,15 +148,57 @@ export default function BeneficiaryDashboard() {
         </div>
 
         <div className="space-y-4">
-          <Card title="Matching Queue" description="No incoming offers yet.">
-            <EmptyState
-              title="No available offers right now"
-              message="Once donor offers are available, they will show up in your queue."
-            />
+          <Card title="Matching Queue" description={`${openMatches.length} open match${openMatches.length === 1 ? "" : "es"}`}>
+            {openMatches.length === 0 ? (
+              <EmptyState
+                title="No available offers right now"
+                message="Once donor offers are matched, they will show up here."
+              />
+            ) : (
+              <ul className="space-y-2 text-sm text-slate-700">
+                {openMatches.slice(0, 4).map((match) => (
+                  <li key={match.id} className="rounded-md border border-green-100 bg-green-50 px-3 py-2">
+                    <p className="font-semibold text-slate-800">{match.food}</p>
+                    <p className="text-xs text-slate-500">
+                      {match.area} · {match.status}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Card>
         </div>
+      </section>
+
+      <section className="mt-5">
+        <Card title="My Requests" description="Support requests saved in this demo store.">
+          {myRequests.length === 0 ? (
+            <EmptyState
+              title="No requests yet"
+              message="Submit a support request to track urgency and approval status."
+            />
+          ) : (
+            <div className="space-y-3">
+              {myRequests.map((request) => (
+                <div key={request.id} className="rounded-lg border border-green-100 bg-white px-4 py-3">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{request.pickupArea}</p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {request.householdSize} · {request.urgency} urgency
+                      </p>
+                      {request.dietaryNotes ? (
+                        <p className="mt-1 text-xs text-slate-500">{request.dietaryNotes}</p>
+                      ) : null}
+                    </div>
+                    <Badge tone={statusTone[request.status]}>{capitalizeStatus(request.status)}</Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
       </section>
     </main>
   );
 }
-
