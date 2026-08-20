@@ -1,4 +1,6 @@
-import { ReactNode } from "react";
+"use client";
+
+import { ReactNode, useEffect } from "react";
 
 type ModalProps = {
   open: boolean;
@@ -8,6 +10,17 @@ type ModalProps = {
 };
 
 export function Modal({ open, title, children, onClose }: ModalProps) {
+  useEffect(() => {
+    if (!open) return;
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") onClose();
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
@@ -16,8 +29,12 @@ export function Modal({ open, title, children, onClose }: ModalProps) {
       role="dialog"
       aria-modal="true"
       aria-label={title}
+      onClick={onClose}
     >
-      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg">
+      <div
+        className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-bold text-[#166534]">{title}</h3>
           <button
@@ -33,4 +50,3 @@ export function Modal({ open, title, children, onClose }: ModalProps) {
     </div>
   );
 }
-
