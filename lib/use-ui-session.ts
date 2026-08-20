@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useSyncExternalStore } from "react";
-import { ACCOUNT_NAME_KEY, ACTIVE_ROLE_KEY, PROFILE_KEY, ProfileState, getAccountName, getActiveRole } from "@/lib/ui-session";
+import { ACCOUNT_NAME_KEY, PROFILE_KEY, ProfileState, getDisplayFirstName, getActiveRole } from "@/lib/ui-session";
 import { Role } from "@/lib/ui";
 
 const EMPTY_PROFILE: ProfileState = {
@@ -30,8 +30,13 @@ function subscribe(callback: () => void) {
   };
 }
 
+function getSessionFlag() {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(ACCOUNT_NAME_KEY) ?? "";
+}
+
 export function useAccountName() {
-  return useSyncExternalStore(subscribe, getAccountName, () => "User");
+  return useSyncExternalStore(subscribe, getDisplayFirstName, () => "User");
 }
 
 export function useActiveRole() {
@@ -65,8 +70,8 @@ export function useProfile() {
   }, [raw]);
 }
 
-// Convenience: check whether a session exists (account name has been set).
+// Session exists when an account key is stored — independent of display greeting.
 export function useIsLoggedIn() {
-  const name = useAccountName();
-  return name !== "User" && name !== "";
+  const session = useSyncExternalStore(subscribe, getSessionFlag, () => "");
+  return session !== "";
 }

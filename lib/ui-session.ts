@@ -77,3 +77,36 @@ export function setProfile(profile: ProfileState) {
   localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
   notify();
 }
+
+/** Prefer profile full name; never greet with an email local-part. */
+export function getDisplayFirstName() {
+  if (typeof window === "undefined") return "User";
+
+  const profile = getProfile();
+  const fromProfile = profile.fullName.trim().split(/\s+/)[0] || "";
+  if (fromProfile) return formatFirstName(fromProfile);
+
+  const stored = (localStorage.getItem(ACCOUNT_NAME_KEY) || "").trim();
+  const emailLocal = profile.email.includes("@") ? profile.email.split("@")[0] : "";
+  if (
+    stored &&
+    stored !== "User" &&
+    !stored.includes("@") &&
+    stored.toLowerCase() !== emailLocal.toLowerCase()
+  ) {
+    return formatFirstName(stored);
+  }
+
+  return "User";
+}
+
+export function formatFirstName(value: string) {
+  const cleaned = value.trim();
+  if (!cleaned) return "User";
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
+export function syncAccountNameFromProfile(fullName: string) {
+  const first = fullName.trim().split(/\s+/)[0] || "User";
+  setAccountName(formatFirstName(first));
+}
