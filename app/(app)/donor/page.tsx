@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
-import { Modal } from "@/components/ui/Modal";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { AuthLoading } from "@/components/ui/AuthLoading";
+import { useToast } from "@/components/ui/Toast";
 import { capitalizeStatus, createDonation, type DonationStatus } from "@/lib/mock-store";
 import { useAccountName } from "@/lib/use-ui-session";
 import { useHubStore } from "@/lib/use-mock-store";
@@ -41,12 +43,12 @@ export default function DonorDashboard() {
   const isLoggedIn = useAuthGuard();
   const accountName = useAccountName();
   const store = useHubStore();
+  const { pushToast } = useToast();
   const [form, setForm] = useState<DonorForm>(initialForm);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [openSuccess, setOpenSuccess] = useState(false);
 
-  if (!isLoggedIn) return null;
+  if (!isLoggedIn) return <AuthLoading />;
 
   const myDonations = store.donations;
   const activeCount = myDonations.filter((item) => item.status === "pending" || item.status === "approved").length;
@@ -67,21 +69,19 @@ export default function DonorDashboard() {
         donorName: accountName || "Donor",
       });
       setLoading(false);
-      setOpenSuccess(true);
       setForm(initialForm);
+      pushToast("Donation submitted and sent for approval.");
     }, 400);
   }
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
-      <p className="text-sm text-slate-500">
-        <Link href="/" className="hover:text-[#16A34A]">
-          Home
-        </Link>{" "}
-        / <span className="font-semibold text-slate-700">Donor Dashboard</span>
-      </p>
+      <PageHeader
+        title="Donor Workspace"
+        description="Share surplus food details so volunteers can coordinate pickup."
+      />
 
-      <section className="mt-4 grid gap-5 md:grid-cols-3">
+      <section className="mt-5 grid gap-5 md:grid-cols-3">
         <div className="md:col-span-2">
           <Card
             title="Create Donation Offer"
@@ -132,7 +132,7 @@ export default function DonorDashboard() {
                   {error}
                 </p>
               ) : null}
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" loading={loading}>
                 {loading ? "Submitting offer..." : "Submit Donation"}
               </Button>
             </form>
@@ -187,12 +187,6 @@ export default function DonorDashboard() {
           )}
         </Card>
       </section>
-
-      <Modal open={openSuccess} title="Donation Submitted" onClose={() => setOpenSuccess(false)}>
-        <p className="text-sm text-slate-700">
-          Your donation offer was saved locally and added to the admin approval queue.
-        </p>
-      </Modal>
     </main>
   );
 }
