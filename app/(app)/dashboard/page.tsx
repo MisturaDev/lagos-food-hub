@@ -4,8 +4,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { AuthLoading } from "@/components/ui/AuthLoading";
 import { Role } from "@/lib/ui";
-import { useAccountName, useActiveRole } from "@/lib/use-ui-session";
+import { useAccountName, useActiveRole, useProfile } from "@/lib/use-ui-session";
 import { useHubStore } from "@/lib/use-mock-store";
 import { useAuthGuard } from "@/lib/use-auth-guard";
 
@@ -42,9 +43,10 @@ export default function DashboardPage() {
   const isLoggedIn = useAuthGuard();
   const activeRole = (useActiveRole() ?? "donor") as Role;
   const accountName = useAccountName();
+  const profile = useProfile();
   const store = useHubStore();
 
-  if (!isLoggedIn) return null;
+  if (!isLoggedIn) return <AuthLoading />;
 
   const firstName = accountName || "User";
   const titleRole = activeRole.charAt(0).toUpperCase() + activeRole.slice(1);
@@ -106,6 +108,49 @@ export default function DashboardPage() {
   const activity = store.notifications.slice(0, 5).map((item) => item.title);
   const stats = statsByRole[activeRole];
 
+  const checklist = [
+    {
+      id: "profile",
+      label: "Complete your profile",
+      done: Boolean(profile.fullName.trim() && profile.email.trim()),
+      href: "/profile",
+    },
+    {
+      id: "role",
+      label: "Confirm your active role",
+      done: Boolean(activeRole),
+      href: "/choose-role",
+    },
+    {
+      id: "first-action",
+      label:
+        activeRole === "donor"
+          ? "Submit your first donation"
+          : activeRole === "beneficiary"
+            ? "Create your first support request"
+            : activeRole === "volunteer"
+              ? "Claim your first delivery task"
+              : "Review the approval queue",
+      done:
+        activeRole === "donor"
+          ? store.donations.length > 0
+          : activeRole === "beneficiary"
+            ? store.requests.length > 0
+            : activeRole === "volunteer"
+              ? store.tasks.some((task) => task.status !== "available")
+              : store.approvals.some((item) => item.status !== "pending"),
+      href:
+        activeRole === "donor"
+          ? "/donor"
+          : activeRole === "beneficiary"
+            ? "/beneficiary"
+            : activeRole === "volunteer"
+              ? "/volunteer"
+              : "/admin",
+    },
+  ];
+  const remaining = checklist.filter((item) => !item.done).length;
+
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
       <p className="text-sm text-slate-500">
@@ -129,6 +174,34 @@ export default function DashboardPage() {
           </Link>
         </div>
       </section>
+
+      {remaining > 0 ? (
+        <section className="mt-4">
+          <Card title="Getting started" description={`${remaining} step${remaining === 1 ? "" : "s"} left`}>
+            <ul className="space-y-2">
+              {checklist.map((item) => (
+                <li
+                  key={item.id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-green-100 bg-white px-3 py-2 text-sm"
+                >
+                  <span className={item.done ? "text-slate-500 line-through" : "font-medium text-slate-800"}>
+                    {item.label}
+                  </span>
+                  {item.done ? (
+                    <span className="text-xs font-semibold text-[#166534]">Done</span>
+                  ) : (
+                    <Link href={item.href}>
+                      <Button variant="secondary" className="px-3 py-1 text-xs">
+                        Continue
+                      </Button>
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Card>
+        </section>
+      ) : null}
 
       <section className="mt-4 grid gap-4 md:grid-cols-3">
         {stats.map((item) => (
