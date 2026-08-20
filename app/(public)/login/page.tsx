@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { getActiveRole, setAccountName } from "@/lib/ui-session";
+import { getAccountName, getActiveRole, getProfile, setAccountName, setProfile, syncAccountNameFromProfile } from "@/lib/ui-session";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,7 +26,23 @@ export default function LoginPage() {
 
     setLoading(true);
     setTimeout(() => {
-      setAccountName(email.split("@")[0] || "User");
+      const profile = getProfile();
+      const nextProfile = {
+        ...profile,
+        email: email.trim() || profile.email,
+      };
+      setProfile(nextProfile);
+
+      if (nextProfile.fullName.trim()) {
+        syncAccountNameFromProfile(nextProfile.fullName);
+      } else {
+        const emailLocal = email.trim().split("@")[0]?.toLowerCase() || "";
+        const existing = getAccountName();
+        if (!existing || existing === "User" || existing.toLowerCase() === emailLocal) {
+          setAccountName("Member");
+        }
+      }
+
       router.push(getActiveRole() ? "/dashboard" : "/choose-role");
       router.refresh();
       setLoading(false);

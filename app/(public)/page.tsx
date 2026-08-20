@@ -140,22 +140,28 @@ export default function Home() {
         </section>
 
         {/* ── CTA banner ───────────────────────────────────────────────── */}
-        <section className="bg-[#166534]">
+        <section className="bg-[#14532d]">
           <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-5 px-4 py-12 text-center sm:flex-row sm:justify-between sm:text-left">
             <div>
-              <h2 className="text-2xl font-black text-white">Ready to reduce food waste in Lagos?</h2>
-              <p className="mt-2 text-sm leading-6 text-green-200">
+              <h2 className="text-2xl font-black text-white md:text-3xl">
+                Ready to reduce food waste in Lagos?
+              </h2>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-white md:text-base">
                 Join donors, volunteers, and community partners already coordinating through the hub.
               </p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-3">
-              <Link href="/register">
-                <Button className="bg-white text-[#166534] hover:bg-green-50">Get Started</Button>
+              <Link
+                href="/register"
+                className="inline-flex items-center justify-center rounded-md bg-white px-5 py-2.5 text-sm font-bold text-[#14532d] shadow-sm transition hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#14532d]"
+              >
+                Get Started
               </Link>
-              <Link href="/matches">
-                <Button variant="ghost" className="border border-green-300 text-white hover:bg-green-700">
-                  View Matches
-                </Button>
+              <Link
+                href="/matches"
+                className="inline-flex items-center justify-center rounded-md border-2 border-white bg-transparent px-5 py-2.5 text-sm font-bold text-white transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#14532d]"
+              >
+                View Matches
               </Link>
             </div>
           </div>

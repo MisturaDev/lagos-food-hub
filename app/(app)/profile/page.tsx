@@ -17,6 +17,7 @@ import {
   setAccountName,
   setActiveRole,
   setProfile,
+  syncAccountNameFromProfile,
 } from "@/lib/ui-session";
 import { useActiveRole } from "@/lib/use-ui-session";
 import { useAuthGuard } from "@/lib/use-auth-guard";
@@ -135,7 +136,7 @@ export default function ProfilePage() {
     setLoading(true);
     setTimeout(() => {
       setProfile(form);
-      setAccountName(form.fullName.trim().split(/\s+/)[0] || "User");
+      syncAccountNameFromProfile(form.fullName);
       setActiveRole(selectedRole);
       setStatus("Profile updated successfully.");
       pushToast("Profile saved.");

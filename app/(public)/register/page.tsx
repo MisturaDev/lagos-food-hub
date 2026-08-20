@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { setAccountName } from "@/lib/ui-session";
+import { setProfile, syncAccountNameFromProfile } from "@/lib/ui-session";
 
 type RegisterState = {
   name: string;
@@ -51,7 +51,15 @@ export default function RegisterPage() {
 
     setLoading(true);
     setTimeout(() => {
-      setAccountName(form.name.trim().split(/\s+/)[0] || "User");
+      const fullName = form.name.trim();
+      setProfile({
+        fullName,
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        location: "",
+        bio: "",
+      });
+      syncAccountNameFromProfile(fullName);
       router.push("/choose-role");
       setLoading(false);
     }, 500);
