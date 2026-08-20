@@ -1,10 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { AuthLoading } from "@/components/ui/AuthLoading";
+import { useToast } from "@/components/ui/Toast";
 import { claimTask, completeTask, type TaskStatus } from "@/lib/mock-store";
 import { useHubStore } from "@/lib/use-mock-store";
 import { useAuthGuard } from "@/lib/use-auth-guard";
@@ -18,23 +20,16 @@ const columns: Array<{ title: string; status: TaskStatus; tone: "success" | "war
 export default function VolunteerDashboard() {
   const isLoggedIn = useAuthGuard();
   const store = useHubStore();
+  const { pushToast } = useToast();
 
-  if (!isLoggedIn) return null;
+  if (!isLoggedIn) return <AuthLoading />;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
-      <p className="text-sm text-slate-500">
-        <Link href="/" className="hover:text-[#16A34A]">
-          Home
-        </Link>{" "}
-        / <span className="font-semibold text-slate-700">Volunteer Dashboard</span>
-      </p>
-      <section className="mt-4">
-        <h1 className="text-2xl font-black text-[#166534]">Task Board</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Claim pickups, move them through transit, and mark handoffs complete.
-        </p>
-      </section>
+      <PageHeader
+        title="Task Board"
+        description="Claim pickups, move them through transit, and mark handoffs complete."
+      />
       <section className="mt-5 grid gap-4 md:grid-cols-3">
         {columns.map((column) => {
           const tasks = store.tasks.filter((task) => task.status === column.status);
@@ -65,7 +60,14 @@ export default function VolunteerDashboard() {
                       </p>
                       <div className="mt-3 flex flex-wrap gap-2">
                         {task.status === "available" ? (
-                          <Button type="button" className="px-3 py-1.5 text-xs" onClick={() => claimTask(task.id)}>
+                          <Button
+                            type="button"
+                            className="px-3 py-1.5 text-xs"
+                            onClick={() => {
+                              claimTask(task.id);
+                              pushToast("Task claimed and moved to In Progress.");
+                            }}
+                          >
                             Claim task
                           </Button>
                         ) : null}
@@ -73,7 +75,10 @@ export default function VolunteerDashboard() {
                           <Button
                             type="button"
                             className="px-3 py-1.5 text-xs"
-                            onClick={() => completeTask(task.id)}
+                            onClick={() => {
+                              completeTask(task.id);
+                              pushToast("Task marked completed.");
+                            }}
                           >
                             Mark completed
                           </Button>

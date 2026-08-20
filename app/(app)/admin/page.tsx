@@ -1,10 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { AuthLoading } from "@/components/ui/AuthLoading";
+import { useToast } from "@/components/ui/Toast";
 import { decideApproval } from "@/lib/mock-store";
 import { useHubStore } from "@/lib/use-mock-store";
 import { useAuthGuard } from "@/lib/use-auth-guard";
@@ -12,8 +14,9 @@ import { useAuthGuard } from "@/lib/use-auth-guard";
 export default function AdminDashboard() {
   const isLoggedIn = useAuthGuard();
   const store = useHubStore();
+  const { pushToast } = useToast();
 
-  if (!isLoggedIn) return null;
+  if (!isLoggedIn) return <AuthLoading />;
 
   const pendingApprovals = store.approvals.filter((item) => item.status === "pending");
   const activeVolunteers = store.tasks.filter((task) => task.status === "in_progress").length;
@@ -22,14 +25,12 @@ export default function AdminDashboard() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
-      <p className="text-sm text-slate-500">
-        <Link href="/" className="hover:text-[#16A34A]">
-          Home
-        </Link>{" "}
-        / <span className="font-semibold text-slate-700">Admin Dashboard</span>
-      </p>
+      <PageHeader
+        title="Admin Workspace"
+        description="Review pending offers and requests, then keep dispatch moving."
+      />
 
-      <section className="mt-4 grid gap-4 md:grid-cols-3">
+      <section className="mt-5 grid gap-4 md:grid-cols-3">
         <Card title={String(pendingApprovals.length)} description="Pending Approvals">
           <Badge tone="warning">Needs review</Badge>
         </Card>
@@ -51,7 +52,7 @@ export default function AdminDashboard() {
           ) : (
             <div className="space-y-3">
               {pendingApprovals.map((item) => (
-                <div key={item.id} className="rounded-lg border border-slate-200 px-3 py-3">
+                <div key={item.id} className="rounded-lg border border-green-100 bg-white px-3 py-3">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
                       <p className="text-sm font-semibold text-slate-800">{item.title}</p>
@@ -63,7 +64,10 @@ export default function AdminDashboard() {
                     <Button
                       type="button"
                       className="px-3 py-1.5 text-xs"
-                      onClick={() => decideApproval(item.id, "approved")}
+                      onClick={() => {
+                        decideApproval(item.id, "approved");
+                        pushToast("Item approved.");
+                      }}
                     >
                       Approve
                     </Button>
@@ -71,7 +75,10 @@ export default function AdminDashboard() {
                       type="button"
                       variant="secondary"
                       className="px-3 py-1.5 text-xs"
-                      onClick={() => decideApproval(item.id, "rejected")}
+                      onClick={() => {
+                        decideApproval(item.id, "rejected");
+                        pushToast("Item rejected.", "info");
+                      }}
                     >
                       Reject
                     </Button>
@@ -88,7 +95,7 @@ export default function AdminDashboard() {
           ) : (
             <ul className="space-y-2 text-sm text-slate-700">
               {recentActivity.map((item) => (
-                <li key={item.id} className="rounded-lg border border-slate-200 px-3 py-2">
+                <li key={item.id} className="rounded-lg border border-green-100 bg-green-50 px-3 py-2">
                   <p className="font-medium text-slate-800">{item.title}</p>
                   <p className="text-xs text-slate-500">{item.time}</p>
                 </li>
