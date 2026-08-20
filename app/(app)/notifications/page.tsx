@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -8,37 +7,39 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { markAllNotificationsRead, markNotificationRead } from "@/lib/mock-store";
 import { useHubStore } from "@/lib/use-mock-store";
 import { useAuthGuard } from "@/lib/use-auth-guard";
+import { AuthLoading } from "@/components/ui/AuthLoading";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { useToast } from "@/components/ui/Toast";
 
 export default function NotificationsPage() {
   const isLoggedIn = useAuthGuard();
   const store = useHubStore();
+  const { pushToast } = useToast();
 
-  if (!isLoggedIn) return null;
+  if (!isLoggedIn) return <AuthLoading />;
 
   const unreadCount = store.notifications.filter((item) => !item.read).length;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
-      <p className="text-sm text-slate-500">
-        <Link href="/" className="hover:text-[#16A34A]">
-          Home
-        </Link>{" "}
-        / <span className="font-semibold text-slate-700">Notifications</span>
-      </p>
-
-      <section className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-black text-[#166534]">Notification Center</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            {unreadCount} unread update{unreadCount === 1 ? "" : "s"} from your workspace.
-          </p>
-        </div>
-        {store.notifications.length > 0 ? (
-          <Button type="button" variant="secondary" onClick={() => markAllNotificationsRead()}>
-            Mark all read
-          </Button>
-        ) : null}
-      </section>
+      <PageHeader
+        title="Notification Center"
+        description={`${unreadCount} unread update${unreadCount === 1 ? "" : "s"} from your workspace.`}
+        actions={
+          store.notifications.length > 0 ? (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                markAllNotificationsRead();
+                pushToast("All notifications marked as read.", "info");
+              }}
+            >
+              Mark all read
+            </Button>
+          ) : null
+        }
+      />
 
       <section className="mt-5">
         <Card title="Latest updates" description="Approvals, matches, and dispatch activity">

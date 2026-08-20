@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -8,6 +8,9 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { AuthLoading } from "@/components/ui/AuthLoading";
+import { useToast } from "@/components/ui/Toast";
 import { updateMatchStatus, type FoodMatch, type MatchStatus, type Urgency } from "@/lib/mock-store";
 import { useHubStore } from "@/lib/use-mock-store";
 import { useAuthGuard } from "@/lib/use-auth-guard";
@@ -36,10 +39,17 @@ const statuses: Array<"All statuses" | MatchStatus> = [
 export default function MatchesPage() {
   const isLoggedIn = useAuthGuard();
   const store = useHubStore();
+  const { pushToast } = useToast();
   const [query, setQuery] = useState("");
   const [area, setArea] = useState("All areas");
   const [status, setStatus] = useState<(typeof statuses)[number]>("All statuses");
   const [selectedMatch, setSelectedMatch] = useState<FoodMatch | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (q) setQuery(q);
+  }, []);
 
   const areas = useMemo(
     () => ["All areas", ...Array.from(new Set(store.matches.map((match) => match.area)))],
@@ -63,26 +73,24 @@ export default function MatchesPage() {
     });
   }, [area, query, status, store.matches]);
 
-  if (!isLoggedIn) return null;
+  if (!isLoggedIn) return <AuthLoading />;
 
   const highUrgencyCount = store.matches.filter((match) => match.urgency === "High").length;
   const volunteerNeededCount = store.matches.filter((match) => match.status === "Needs volunteer").length;
+  const hasFilters = query.trim() !== "" || area !== "All areas" || status !== "All statuses";
+
+  function clearFilters() {
+    setQuery("");
+    setArea("All areas");
+    setStatus("All statuses");
+  }
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
-      <p className="text-sm text-slate-500">
-        <Link href="/" className="hover:text-[#16A34A]">
-          Home
-        </Link>{" "}
-        / <span className="font-semibold text-slate-700">Match Center</span>
-      </p>
-
-      <section className="mt-4">
-        <h1 className="text-3xl font-black tracking-tight text-[#166534] md:text-4xl">Food Match Center</h1>
-        <p className="mt-2 max-w-3xl text-sm text-slate-600 md:text-base">
-          Live donation offers, beneficiary needs, and volunteer dispatch status in one queue.
-        </p>
-      </section>
+      <PageHeader
+        title="Food Match Center"
+        description="Live donation offers, beneficiary needs, and volunteer dispatch status in one queue."
+      />
 
       <section className="mt-5 grid gap-4 md:grid-cols-3">
         <Card title={String(store.matches.length)} description="Open matches">
@@ -187,6 +195,13 @@ export default function MatchesPage() {
           <EmptyState
             title="No matches found"
             message="Try a different area, status, or search term."
+            action={
+              hasFilters ? (
+                <Button type="button" variant="secondary" onClick={clearFilters}>
+                  Clear filters
+                </Button>
+              ) : null
+            }
           />
         </section>
       ) : null}
@@ -207,6 +222,7 @@ export default function MatchesPage() {
                 type="button"
                 onClick={() => {
                   updateMatchStatus(selectedMatch.id, "Needs volunteer");
+                  pushToast("Volunteer requested for this match.");
                   setSelectedMatch(null);
                 }}
               >
@@ -217,6 +233,7 @@ export default function MatchesPage() {
                 variant="secondary"
                 onClick={() => {
                   updateMatchStatus(selectedMatch.id, "Scheduled");
+                  pushToast("Match marked scheduled.");
                   setSelectedMatch(null);
                 }}
               >
@@ -227,6 +244,7 @@ export default function MatchesPage() {
                 variant="ghost"
                 onClick={() => {
                   updateMatchStatus(selectedMatch.id, "Completed");
+                  pushToast("Match marked completed.");
                   setSelectedMatch(null);
                 }}
               >
