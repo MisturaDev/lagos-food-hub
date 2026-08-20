@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ACCOUNT_NAME_KEY, ACTIVE_ROLE_KEY, PROFILE_KEY } from "@/lib/ui-session";
 import { useActiveRole } from "@/lib/use-ui-session";
+import { useHubStore } from "@/lib/use-mock-store";
 
 type IconName =
   | "home"
@@ -139,7 +140,15 @@ function SidebarIcon({ name }: { name: IconName }) {
   );
 }
 
-function NavSection({ title, items }: { title?: string; items: NavItem[] }) {
+function NavSection({
+  title,
+  items,
+  badges = {},
+}: {
+  title?: string;
+  items: NavItem[];
+  badges?: Record<string, number>;
+}) {
   const pathname = usePathname();
 
   return (
@@ -152,6 +161,7 @@ function NavSection({ title, items }: { title?: string; items: NavItem[] }) {
       <div className="flex gap-2 overflow-x-auto md:block md:space-y-1 md:overflow-visible">
         {items.map((item) => {
           const isActive = pathname === item.href;
+          const badgeCount = badges[item.href] ?? 0;
           return (
             <Link
               key={item.href}
@@ -165,6 +175,11 @@ function NavSection({ title, items }: { title?: string; items: NavItem[] }) {
             >
               <SidebarIcon name={item.icon} />
               <span>{item.label}</span>
+              {badgeCount > 0 ? (
+                <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-[#16A34A] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                  {badgeCount > 9 ? "9+" : badgeCount}
+                </span>
+              ) : null}
             </Link>
           );
         })}
@@ -176,7 +191,9 @@ function NavSection({ title, items }: { title?: string; items: NavItem[] }) {
 export function Sidebar() {
   const router = useRouter();
   const activeRole = useActiveRole();
+  const store = useHubStore();
   const roleWorkspaces = workspacesForRole(activeRole);
+  const unreadCount = store.notifications.filter((item) => !item.read).length;
 
   function onLogout() {
     if (typeof window !== "undefined") {
@@ -193,7 +210,7 @@ export function Sidebar() {
         className="flex gap-3 overflow-x-auto md:block md:space-y-6 md:overflow-visible"
         aria-label="Sidebar navigation"
       >
-        <NavSection items={mainNav} />
+        <NavSection items={mainNav} badges={{ "/notifications": unreadCount }} />
         <NavSection title="Workspaces" items={roleWorkspaces} />
         <NavSection title="Account" items={accountNav} />
 

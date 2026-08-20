@@ -1,16 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useIsLoggedIn, useAccountName } from "@/lib/use-ui-session";
 
 export function Navbar() {
+  const router = useRouter();
   const isLoggedIn = useIsLoggedIn();
   const accountName = useAccountName();
+  const [query, setQuery] = useState("");
+
+  function onSearch(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const q = query.trim();
+    router.push(q ? `/matches?q=${encodeURIComponent(q)}` : "/matches");
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-green-100 bg-white/95 backdrop-blur">
       <nav className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3" aria-label="Top bar">
-        {/* Logo */}
         <Link href="/" className="flex min-w-0 items-center gap-3">
           <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#166534] text-xl font-black text-white shadow-sm">
             F
@@ -24,8 +33,10 @@ export function Navbar() {
           </span>
         </Link>
 
-        {/* Search */}
-        <div className="hidden min-w-0 max-w-md flex-1 items-center rounded-md border border-slate-200 bg-white px-3 py-2 shadow-sm lg:flex">
+        <form
+          onSubmit={onSearch}
+          className="hidden min-w-0 max-w-md flex-1 items-center rounded-md border border-slate-200 bg-white px-3 py-2 shadow-sm lg:flex"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -40,17 +51,17 @@ export function Navbar() {
           </svg>
           <input
             type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Search donors, areas, matches..."
             className="ml-2 w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-            aria-label="Search"
+            aria-label="Search matches"
           />
-        </div>
+        </form>
 
-        {/* Auth actions */}
         <div className="flex items-center gap-2">
           {isLoggedIn ? (
             <>
-              {/* Greeting — hidden on small screens */}
               <span className="hidden text-sm font-semibold text-slate-700 sm:inline">
                 Hi, {accountName}
               </span>
