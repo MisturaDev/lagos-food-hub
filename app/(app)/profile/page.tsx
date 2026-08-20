@@ -20,6 +20,9 @@ import {
 } from "@/lib/ui-session";
 import { useActiveRole } from "@/lib/use-ui-session";
 import { useAuthGuard } from "@/lib/use-auth-guard";
+import { useHubStore } from "@/lib/use-mock-store";
+import { AuthLoading } from "@/components/ui/AuthLoading";
+import { useToast } from "@/components/ui/Toast";
 
 type NotificationPrefs = {
   emailNotifications: boolean;
@@ -33,6 +36,8 @@ export default function ProfilePage() {
   const isLoggedIn = useAuthGuard();
   const router = useRouter();
   const activeRole = useActiveRole();
+  const store = useHubStore();
+  const { pushToast } = useToast();
   const [form, setForm] = useState(() => getProfile());
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<Role>(activeRole ?? "volunteer");
@@ -65,28 +70,49 @@ export default function ProfilePage() {
     volunteer: ["View assignments", "Update task progress", "Edit profile details"],
     admin: ["Manage approvals", "Assign teams", "View system reports"],
   };
+  const summaryRole = activeRole ?? selectedRole;
   const activitySummaryByRole: Record<Role, Array<{ label: string; value: string }>> = {
     donor: [
-      { label: "Total Donations", value: "18" },
-      { label: "Meals Shared", value: "740" },
-      { label: "Active Donations", value: "3" },
+      { label: "Total Donations", value: String(store.donations.length) },
+      {
+        label: "Active Donations",
+        value: String(store.donations.filter((item) => item.status === "pending" || item.status === "approved").length),
+      },
+      {
+        label: "Approved Offers",
+        value: String(store.donations.filter((item) => item.status === "approved" || item.status === "matched").length),
+      },
     ],
     volunteer: [
-      { label: "Deliveries Completed", value: "27" },
-      { label: "Communities Helped", value: "9" },
+      {
+        label: "Deliveries Completed",
+        value: String(store.tasks.filter((item) => item.status === "completed").length),
+      },
+      {
+        label: "Active Deliveries",
+        value: String(store.tasks.filter((item) => item.status === "in_progress").length),
+      },
     ],
     beneficiary: [
-      { label: "Requests Made", value: "11" },
-      { label: "Support Received", value: "8" },
+      { label: "Requests Made", value: String(store.requests.length) },
+      {
+        label: "Support Received",
+        value: String(store.requests.filter((item) => item.status === "fulfilled" || item.status === "matched").length),
+      },
     ],
     admin: [
-      { label: "Approvals Processed", value: "56" },
-      { label: "Active Assignments", value: "14" },
+      {
+        label: "Approvals Processed",
+        value: String(store.approvals.filter((item) => item.status !== "pending").length),
+      },
+      {
+        label: "Pending Queue",
+        value: String(store.approvals.filter((item) => item.status === "pending").length),
+      },
     ],
   };
-  const summaryRole = activeRole ?? selectedRole;
 
-  if (!isLoggedIn) return null;
+  if (!isLoggedIn) return <AuthLoading />;
 
   function onPhotoChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -112,6 +138,7 @@ export default function ProfilePage() {
       setAccountName(form.fullName.trim().split(/\s+/)[0] || "User");
       setActiveRole(selectedRole);
       setStatus("Profile updated successfully.");
+      pushToast("Profile saved.");
       setLoading(false);
     }, 500);
   }
@@ -137,6 +164,7 @@ export default function ProfilePage() {
     }
 
     setPasswordStatus("Password updated (UI demo only).");
+    pushToast("Password updated (demo only).", "info");
     setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
   }
 
@@ -271,7 +299,7 @@ export default function ProfilePage() {
                   {status}
                 </p>
               ) : null}
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading} loading={loading}>
                 {loading ? "Saving..." : "Save Profile"}
               </Button>
               </form>

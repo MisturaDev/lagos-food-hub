@@ -63,7 +63,7 @@ export default function ChooseRolePage() {
       </p>
 
       <section className="mt-6 max-w-2xl">
-        <h1 className="text-3xl font-black tracking-tight text-[#12312a]">What's your role?</h1>
+                <h1 className="text-3xl font-black tracking-tight text-[#166534]">What's your role?</h1>
         <p className="mt-2 text-sm leading-6 text-slate-600">
           Pick the role that best describes how you participate in the hub. You can switch later from
           your profile.
