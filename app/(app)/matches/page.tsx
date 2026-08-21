@@ -11,9 +11,10 @@ import { Modal } from "@/components/ui/Modal";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { AuthLoading } from "@/components/ui/AuthLoading";
 import { useToast } from "@/components/ui/Toast";
-import { updateMatchStatus, type FoodMatch, type MatchStatus, type Urgency } from "@/lib/mock-store";
+import { linkDonationToRequest, updateMatchStatus, type FoodMatch, type MatchStatus, type Urgency } from "@/lib/mock-store";
 import { useHubStore } from "@/lib/use-mock-store";
 import { useAuthGuard } from "@/lib/use-auth-guard";
+import { useActiveRole } from "@/lib/use-ui-session";
 
 const urgencyTone: Record<Urgency, "neutral" | "success" | "warning"> = {
   High: "warning",
@@ -38,18 +39,29 @@ const statuses: Array<"All statuses" | MatchStatus> = [
 
 export default function MatchesPage() {
   const isLoggedIn = useAuthGuard();
+  const activeRole = useActiveRole();
   const store = useHubStore();
   const { pushToast } = useToast();
   const [query, setQuery] = useState("");
   const [area, setArea] = useState("All areas");
   const [status, setStatus] = useState<(typeof statuses)[number]>("All statuses");
   const [selectedMatch, setSelectedMatch] = useState<FoodMatch | null>(null);
+  const [donationId, setDonationId] = useState("");
+  const [requestId, setRequestId] = useState("");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const q = new URLSearchParams(window.location.search).get("q");
     if (q) setQuery(q);
   }, []);
+
+  const linkableDonations = store.donations.filter(
+    (item) => item.status === "approved" || item.status === "pending",
+  );
+  const linkableRequests = store.requests.filter(
+    (item) => item.status === "approved" || item.status === "pending",
+  );
+  const canLink = activeRole === "admin" || activeRole === "donor" || activeRole === "beneficiary";
 
   const areas = useMemo(
     () => ["All areas", ...Array.from(new Set(store.matches.map((match) => match.area)))],
@@ -149,6 +161,72 @@ export default function MatchesPage() {
           </div>
         </div>
       </section>
+
+      {canLink ? (
+        <section className="mt-5">
+          <Card title="Link donation to request" description="Create a new match from approved or pending supply and need.">
+            <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+              <div>
+                <label htmlFor="donationSelect" className="mb-1 block text-sm font-medium text-slate-800">
+                  Donation
+                </label>
+                <select
+                  id="donationSelect"
+                  className="w-full rounded-md border border-green-200 bg-white px-3 py-2 text-sm"
+                  value={donationId}
+                  onChange={(e) => setDonationId(e.target.value)}
+                >
+                  <option value="">Select donation</option>
+                  {linkableDonations.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.foodType} · {item.quantity}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="requestSelect" className="mb-1 block text-sm font-medium text-slate-800">
+                  Request
+                </label>
+                <select
+                  id="requestSelect"
+                  className="w-full rounded-md border border-green-200 bg-white px-3 py-2 text-sm"
+                  value={requestId}
+                  onChange={(e) => setRequestId(e.target.value)}
+                >
+                  <option value="">Select request</option>
+                  {linkableRequests.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.beneficiaryName} · {item.pickupArea}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-end">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (!donationId || !requestId) {
+                      pushToast("Select both a donation and a request.", "error");
+                      return;
+                    }
+                    const created = linkDonationToRequest(donationId, requestId);
+                    if (!created) {
+                      pushToast("Could not create match.", "error");
+                      return;
+                    }
+                    setDonationId("");
+                    setRequestId("");
+                    pushToast("Match linked and volunteer task created.");
+                  }}
+                >
+                  Create match
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </section>
+      ) : null}
 
       <section className="mt-5 grid gap-4 lg:grid-cols-2">
         {filteredMatches.map((match) => (
