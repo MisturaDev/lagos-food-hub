@@ -1,5 +1,5 @@
-export type DonationStatus = "pending" | "approved" | "matched" | "rejected" | "completed";
-export type RequestStatus = "pending" | "approved" | "matched" | "rejected" | "fulfilled";
+export type DonationStatus = "pending" | "approved" | "matched" | "rejected" | "completed" | "cancelled";
+export type RequestStatus = "pending" | "approved" | "matched" | "rejected" | "fulfilled" | "cancelled";
 export type TaskStatus = "available" | "in_progress" | "completed";
 export type MatchStatus = "Ready" | "Needs volunteer" | "Scheduled" | "Completed";
 export type Urgency = "High" | "Medium" | "Low";
@@ -50,6 +50,8 @@ export type FoodMatch = {
   urgency: Urgency;
   status: MatchStatus;
   route: string;
+  donationId?: string;
+  requestId?: string;
 };
 
 export type ApprovalItem = {
@@ -502,6 +504,144 @@ export function markAllNotificationsRead() {
   const store = readStore();
   store.notifications = store.notifications.map((item) => ({ ...item, read: true }));
   writeStore(store);
+}
+
+export function updateDonation(
+  id: string,
+  patch: Partial<Pick<Donation, "foodType" | "quantity" | "pickupWindow" | "location" | "contact">>,
+) {
+  const store = readStore();
+  const current = store.donations.find((item) => item.id === id);
+  if (!current || current.status === "cancelled" || current.status === "completed") return null;
+
+  store.donations = store.donations.map((item) => (item.id === id ? { ...item, ...patch } : item));
+  pushNotification(store, `Donation updated: ${patch.foodType ?? current.foodType}`, "neutral");
+  writeStore(store);
+  return store.donations.find((item) => item.id === id) ?? null;
+}
+
+export function cancelDonation(id: string) {
+  const store = readStore();
+  const current = store.donations.find((item) => item.id === id);
+  if (!current) return;
+
+  store.donations = store.donations.map((item) =>
+    item.id === id ? { ...item, status: "cancelled" } : item,
+  );
+  store.approvals = store.approvals.map((item) =>
+    item.relatedId === id && item.status === "pending" ? { ...item, status: "rejected" } : item,
+  );
+  pushNotification(store, `Donation cancelled: ${current.foodType}`, "warning");
+  writeStore(store);
+}
+
+export function updateSupportRequest(
+  id: string,
+  patch: Partial<Pick<SupportRequest, "householdSize" | "urgency" | "dietaryNotes" | "pickupArea">>,
+) {
+  const store = readStore();
+  const current = store.requests.find((item) => item.id === id);
+  if (!current || current.status === "cancelled" || current.status === "fulfilled") return null;
+
+  store.requests = store.requests.map((item) => (item.id === id ? { ...item, ...patch } : item));
+  pushNotification(store, `Request updated: ${patch.pickupArea ?? current.pickupArea}`, "neutral");
+  writeStore(store);
+  return store.requests.find((item) => item.id === id) ?? null;
+}
+
+export function cancelSupportRequest(id: string) {
+  const store = readStore();
+  const current = store.requests.find((item) => item.id === id);
+  if (!current) return;
+
+  store.requests = store.requests.map((item) =>
+    item.id === id ? { ...item, status: "cancelled" } : item,
+  );
+  store.approvals = store.approvals.map((item) =>
+    item.relatedId === id && item.status === "pending" ? { ...item, status: "rejected" } : item,
+  );
+  pushNotification(store, `Request cancelled for ${current.pickupArea}`, "warning");
+  writeStore(store);
+}
+
+export function linkDonationToRequest(donationId: string, requestId: string) {
+  const store = readStore();
+  const donation = store.donations.find((item) => item.id === donationId);
+  const request = store.requests.find((item) => item.id === requestId);
+  if (!donation || !request) return null;
+  if (donation.status === "cancelled" || donation.status === "rejected") return null;
+  if (request.status === "cancelled" || request.status === "rejected") return null;
+
+  const area = request.pickupArea.split(",")[0]?.trim() || request.pickupArea;
+  const match: FoodMatch = {
+    id: makeId("LFH"),
+    donor: donation.donorName,
+    food: donation.foodType,
+    quantity: donation.quantity,
+    area,
+    pickupWindow: donation.pickupWindow,
+    beneficiary: request.beneficiaryName,
+    urgency: request.urgency,
+    status: "Needs volunteer",
+    route: `${area} -> ${request.pickupArea}`,
+    donationId: donation.id,
+    requestId: request.id,
+  };
+
+  store.matches = [match, ...store.matches];
+  store.donations = store.donations.map((item) =>
+    item.id === donationId ? { ...item, status: "matched" } : item,
+  );
+  store.requests = store.requests.map((item) =>
+    item.id === requestId ? { ...item, status: "matched" } : item,
+  );
+  store.tasks = [
+    {
+      id: makeId("TSK"),
+      title: `${area} pickup - ${donation.quantity}`,
+      area,
+      quantity: donation.quantity,
+      status: "available",
+      matchId: match.id,
+      createdAt: nowIso(),
+    },
+    ...store.tasks,
+  ];
+  pushNotification(store, `Linked match created: ${donation.foodType}`, "success");
+  writeStore(store);
+  return match;
+}
+
+export function getImpactStats(store: HubStore = readStore()) {
+  const completedMatches = store.matches.filter((item) => item.status === "Completed").length;
+  const completedTasks = store.tasks.filter((item) => item.status === "completed").length;
+  const activeRoutes = store.matches.filter(
+    (item) => item.status === "Scheduled" || item.status === "Needs volunteer" || item.status === "Ready",
+  ).length;
+  const openDonations = store.donations.filter(
+    (item) => item.status === "pending" || item.status === "approved" || item.status === "matched",
+  ).length;
+  const openRequests = store.requests.filter(
+    (item) => item.status === "pending" || item.status === "approved" || item.status === "matched",
+  ).length;
+  const areas = Array.from(
+    new Set([
+      ...store.matches.map((item) => item.area),
+      ...store.tasks.map((item) => item.area),
+    ]),
+  );
+
+  return {
+    completedMatches,
+    completedTasks,
+    activeRoutes,
+    openDonations,
+    openRequests,
+    areasServed: areas.length,
+    totalMatches: store.matches.length,
+    totalDonations: store.donations.length,
+    totalRequests: store.requests.length,
+  };
 }
 
 export function capitalizeStatus(value: string) {
