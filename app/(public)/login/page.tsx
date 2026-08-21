@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { getAccountName, getActiveRole, getProfile, setAccountName, setProfile, syncAccountNameFromProfile } from "@/lib/ui-session";
 
 export default function LoginPage() {
@@ -68,10 +69,9 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <Input
+              <PasswordInput
                 id="password"
                 label="Password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />

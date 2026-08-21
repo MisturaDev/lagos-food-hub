@@ -5,7 +5,11 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useIsLoggedIn, useAccountName } from "@/lib/use-ui-session";
 
-export function Navbar() {
+type NavbarProps = {
+  showSearch?: boolean;
+};
+
+export function Navbar({ showSearch = false }: NavbarProps) {
   const router = useRouter();
   const isLoggedIn = useIsLoggedIn();
   const accountName = useAccountName();
@@ -33,31 +37,33 @@ export function Navbar() {
           </span>
         </Link>
 
-        <form
-          onSubmit={onSearch}
-          className="hidden min-w-0 max-w-md flex-1 items-center rounded-md border border-slate-200 bg-white px-3 py-2 shadow-sm lg:flex"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="h-4 w-4 text-slate-400"
-            aria-hidden="true"
+        {showSearch ? (
+          <form
+            onSubmit={onSearch}
+            className="hidden min-w-0 max-w-md flex-1 items-center rounded-md border border-slate-200 bg-white px-3 py-2 shadow-sm md:flex"
           >
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-3.5-3.5" />
-          </svg>
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search donors, areas, matches..."
-            className="ml-2 w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-            aria-label="Search matches"
-          />
-        </form>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="h-4 w-4 text-slate-400"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search donors, areas, matches..."
+              className="ml-2 w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+              aria-label="Search matches"
+            />
+          </form>
+        ) : null}
 
         <div className="flex items-center gap-2">
           {isLoggedIn ? (

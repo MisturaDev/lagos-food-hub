@@ -15,6 +15,7 @@ type IconName =
   | "beneficiary"
   | "volunteer"
   | "admin"
+  | "impact"
   | "profile"
   | "logout";
 
@@ -28,6 +29,7 @@ const mainNav: NavItem[] = [
   { href: "/", label: "Home", icon: "home" },
   { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
   { href: "/matches", label: "Match Center", icon: "matches" },
+  { href: "/impact", label: "Impact", icon: "impact" },
   { href: "/notifications", label: "Notifications", icon: "bell" },
 ];
 
@@ -117,6 +119,18 @@ function SidebarIcon({ name }: { name: IconName }) {
     return (
       <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z" />
+      </svg>
+    );
+  }
+
+  if (name === "impact") {
+    return (
+      <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+        <path d="M4 19V5" />
+        <path d="M4 19h16" />
+        <path d="M8 17V10" />
+        <path d="M12 17V7" />
+        <path d="M16 17v-4" />
       </svg>
     );
   }
