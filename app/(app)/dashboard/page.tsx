@@ -222,6 +222,11 @@ export default function DashboardPage() {
                   </Button>
                 </Link>
               ))}
+              <Link href="/impact">
+                <Button variant="ghost" className="w-full px-3 py-1.5 text-xs">
+                  View Impact
+                </Button>
+              </Link>
             </div>
           </Card>
         </div>
