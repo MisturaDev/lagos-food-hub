@@ -10,7 +10,7 @@ export default function AppLayout({
   return (
     <ToastProvider>
       <div className="min-h-screen text-slate-900">
-        <Navbar />
+        <Navbar showSearch />
         <div className="md:flex">
           <Sidebar />
           <div className="min-w-0 flex-1">{children}</div>
