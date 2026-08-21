@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -16,18 +16,17 @@ import {
   type RequestStatus,
   type Urgency,
 } from "@/lib/mock-store";
+import {
+  clearRequestDraft,
+  getRequestDraft,
+  saveRequestDraft,
+  type RequestDraft,
+} from "@/lib/drafts";
 import { useAccountName } from "@/lib/use-ui-session";
 import { useHubStore } from "@/lib/use-mock-store";
-import { useAuthGuard } from "@/lib/use-auth-guard";
+import { useRoleGuard } from "@/lib/use-role-guard";
 
-type RequestForm = {
-  householdSize: string;
-  urgency: "" | Urgency;
-  dietaryNotes: string;
-  pickupArea: string;
-};
-
-const initialRequest: RequestForm = {
+const initialRequest: RequestDraft = {
   householdSize: "",
   urgency: "",
   dietaryNotes: "",
@@ -40,18 +39,33 @@ const statusTone: Record<RequestStatus, "neutral" | "success" | "warning"> = {
   matched: "success",
   rejected: "neutral",
   fulfilled: "success",
+  cancelled: "neutral",
 };
 
 export default function BeneficiaryDashboard() {
-  const isLoggedIn = useAuthGuard();
+  const allowed = useRoleGuard(["beneficiary", "admin"]);
   const accountName = useAccountName();
   const store = useHubStore();
   const { pushToast } = useToast();
-  const [form, setForm] = useState<RequestForm>(initialRequest);
+  const [form, setForm] = useState<RequestDraft>(initialRequest);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
 
-  if (!isLoggedIn) return <AuthLoading />;
+  useEffect(() => {
+    const draft = getRequestDraft();
+    if (draft) setForm(draft);
+    setDraftReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!draftReady) return;
+    const hasContent = Object.values(form).some((value) => value.trim());
+    if (hasContent) saveRequestDraft(form);
+    else clearRequestDraft();
+  }, [draftReady, form]);
+
+  if (!allowed) return <AuthLoading />;
 
   const myRequests = store.requests;
   const openMatches = store.matches.filter((match) => match.status !== "Completed");
@@ -75,6 +89,7 @@ export default function BeneficiaryDashboard() {
         beneficiaryName: accountName || "Beneficiary",
       });
       setForm(initialRequest);
+      clearRequestDraft();
       setLoading(false);
       pushToast("Support request saved and sent for approval.");
     }, 350);
@@ -89,7 +104,7 @@ export default function BeneficiaryDashboard() {
 
       <section className="mt-5 grid gap-5 md:grid-cols-3">
         <div className="md:col-span-2">
-          <Card title="Create Support Request" description="Share your needs for better matching.">
+          <Card title="Create Support Request" description="Drafts auto-save in this browser until you submit.">
             <form onSubmit={submitRequest} className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <Input
@@ -107,9 +122,7 @@ export default function BeneficiaryDashboard() {
                     id="urgency"
                     className="w-full rounded-md border border-green-200 bg-white px-3 py-2 text-sm text-slate-900 focus-visible:ring-2 focus-visible:ring-[#16A34A]"
                     value={form.urgency}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, urgency: e.target.value as RequestForm["urgency"] }))
-                    }
+                    onChange={(e) => setForm((prev) => ({ ...prev, urgency: e.target.value }))}
                   >
                     <option value="">Select urgency</option>
                     <option value="Low">Low</option>
@@ -142,9 +155,22 @@ export default function BeneficiaryDashboard() {
                   {error}
                 </p>
               ) : null}
-              <Button type="submit" loading={loading}>
-                {loading ? "Saving request..." : "Save Request"}
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button type="submit" loading={loading}>
+                  {loading ? "Saving request..." : "Save Request"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    setForm(initialRequest);
+                    clearRequestDraft();
+                    pushToast("Draft cleared.", "info");
+                  }}
+                >
+                  Clear draft
+                </Button>
+              </div>
             </form>
           </Card>
         </div>
@@ -178,7 +204,7 @@ export default function BeneficiaryDashboard() {
       </section>
 
       <section className="mt-5">
-        <Card title="My Requests" description="Support requests saved in this demo store.">
+        <Card title="My Requests" description="Open a request to edit or cancel it.">
           {myRequests.length === 0 ? (
             <EmptyState
               title="No requests yet"
@@ -187,7 +213,11 @@ export default function BeneficiaryDashboard() {
           ) : (
             <div className="space-y-3">
               {myRequests.map((request) => (
-                <div key={request.id} className="rounded-lg border border-green-100 bg-white px-4 py-3">
+                <Link
+                  key={request.id}
+                  href={`/beneficiary/${request.id}`}
+                  className="block rounded-lg border border-green-100 bg-white px-4 py-3 transition hover:border-green-300 hover:bg-green-50"
+                >
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
                       <p className="text-sm font-semibold text-slate-900">{request.pickupArea}</p>
@@ -200,7 +230,7 @@ export default function BeneficiaryDashboard() {
                     </div>
                     <Badge tone={statusTone[request.status]}>{capitalizeStatus(request.status)}</Badge>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

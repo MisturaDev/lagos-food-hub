@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -11,19 +11,17 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { AuthLoading } from "@/components/ui/AuthLoading";
 import { useToast } from "@/components/ui/Toast";
 import { capitalizeStatus, createDonation, type DonationStatus } from "@/lib/mock-store";
+import {
+  clearDonationDraft,
+  getDonationDraft,
+  saveDonationDraft,
+  type DonationDraft,
+} from "@/lib/drafts";
 import { useAccountName } from "@/lib/use-ui-session";
 import { useHubStore } from "@/lib/use-mock-store";
-import { useAuthGuard } from "@/lib/use-auth-guard";
+import { useRoleGuard } from "@/lib/use-role-guard";
 
-type DonorForm = {
-  foodType: string;
-  quantity: string;
-  pickupWindow: string;
-  location: string;
-  contact: string;
-};
-
-const initialForm: DonorForm = {
+const initialForm: DonationDraft = {
   foodType: "",
   quantity: "",
   pickupWindow: "",
@@ -37,18 +35,33 @@ const statusTone: Record<DonationStatus, "neutral" | "success" | "warning"> = {
   matched: "success",
   rejected: "neutral",
   completed: "success",
+  cancelled: "neutral",
 };
 
 export default function DonorDashboard() {
-  const isLoggedIn = useAuthGuard();
+  const allowed = useRoleGuard(["donor", "admin"]);
   const accountName = useAccountName();
   const store = useHubStore();
   const { pushToast } = useToast();
-  const [form, setForm] = useState<DonorForm>(initialForm);
+  const [form, setForm] = useState<DonationDraft>(initialForm);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
 
-  if (!isLoggedIn) return <AuthLoading />;
+  useEffect(() => {
+    const draft = getDonationDraft();
+    if (draft) setForm(draft);
+    setDraftReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!draftReady) return;
+    const hasContent = Object.values(form).some((value) => value.trim());
+    if (hasContent) saveDonationDraft(form);
+    else clearDonationDraft();
+  }, [draftReady, form]);
+
+  if (!allowed) return <AuthLoading />;
 
   const myDonations = store.donations;
   const activeCount = myDonations.filter((item) => item.status === "pending" || item.status === "approved").length;
@@ -70,6 +83,7 @@ export default function DonorDashboard() {
       });
       setLoading(false);
       setForm(initialForm);
+      clearDonationDraft();
       pushToast("Donation submitted and sent for approval.");
     }, 400);
   }
@@ -85,7 +99,7 @@ export default function DonorDashboard() {
         <div className="md:col-span-2">
           <Card
             title="Create Donation Offer"
-            description="Share food details so volunteers can coordinate pickup."
+            description="Drafts auto-save in this browser until you submit."
           >
             <form onSubmit={submitDonation} className="space-y-4" aria-live="polite">
               <div className="grid gap-4 md:grid-cols-2">
@@ -132,9 +146,22 @@ export default function DonorDashboard() {
                   {error}
                 </p>
               ) : null}
-              <Button type="submit" loading={loading}>
-                {loading ? "Submitting offer..." : "Submit Donation"}
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button type="submit" loading={loading}>
+                  {loading ? "Submitting offer..." : "Submit Donation"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    setForm(initialForm);
+                    clearDonationDraft();
+                    pushToast("Draft cleared.", "info");
+                  }}
+                >
+                  Clear draft
+                </Button>
+              </div>
             </form>
           </Card>
         </div>
@@ -158,7 +185,7 @@ export default function DonorDashboard() {
       </section>
 
       <section className="mt-5">
-        <Card title="My Donations" description="Offers you have submitted in this demo store.">
+        <Card title="My Donations" description="Open an offer to edit or cancel it.">
           {myDonations.length === 0 ? (
             <EmptyState
               title="No donations yet"
@@ -167,9 +194,10 @@ export default function DonorDashboard() {
           ) : (
             <div className="space-y-3">
               {myDonations.map((donation) => (
-                <div
+                <Link
                   key={donation.id}
-                  className="rounded-lg border border-green-100 bg-white px-4 py-3"
+                  href={`/donor/${donation.id}`}
+                  className="block rounded-lg border border-green-100 bg-white px-4 py-3 transition hover:border-green-300 hover:bg-green-50"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
@@ -181,7 +209,7 @@ export default function DonorDashboard() {
                     </div>
                     <Badge tone={statusTone[donation.status]}>{capitalizeStatus(donation.status)}</Badge>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
