@@ -9,14 +9,14 @@ import { AuthLoading } from "@/components/ui/AuthLoading";
 import { useToast } from "@/components/ui/Toast";
 import { decideApproval } from "@/lib/mock-store";
 import { useHubStore } from "@/lib/use-mock-store";
-import { useAuthGuard } from "@/lib/use-auth-guard";
+import { useRoleGuard } from "@/lib/use-role-guard";
 
 export default function AdminDashboard() {
-  const isLoggedIn = useAuthGuard();
+  const allowed = useRoleGuard("admin");
   const store = useHubStore();
   const { pushToast } = useToast();
 
-  if (!isLoggedIn) return <AuthLoading />;
+  if (!allowed) return <AuthLoading />;
 
   const pendingApprovals = store.approvals.filter((item) => item.status === "pending");
   const activeVolunteers = store.tasks.filter((task) => task.status === "in_progress").length;
