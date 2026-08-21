@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { setProfile, syncAccountNameFromProfile } from "@/lib/ui-session";
 
 type RegisterState = {
@@ -101,17 +102,15 @@ export default function RegisterPage() {
                 />
               </div>
               <div className="grid gap-4 md:grid-cols-2">
-                <Input
+                <PasswordInput
                   id="password"
                   label="Password"
-                  type="password"
                   value={form.password}
                   onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
                 />
-                <Input
+                <PasswordInput
                   id="confirmPassword"
                   label="Confirm Password"
-                  type="password"
                   value={form.confirmPassword}
                   onChange={(e) => setForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                 />

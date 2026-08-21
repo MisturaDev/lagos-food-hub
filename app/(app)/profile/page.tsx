@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { Role, roleOptions } from "@/lib/ui";
 import {
   ACCOUNT_NAME_KEY,
@@ -311,27 +312,24 @@ export default function ProfilePage() {
             <Card title="Security Settings" description="Protect your account and manage session access.">
               <form onSubmit={onSavePassword} className="space-y-3">
                 <h3 className="text-sm font-semibold text-slate-800">Change Password</h3>
-                <Input
+                <PasswordInput
                   id="currentPassword"
                   label="Current Password"
-                  type="password"
                   value={passwordForm.currentPassword}
                   onChange={(e) =>
                     setPasswordForm((prev) => ({ ...prev, currentPassword: e.target.value }))
                   }
                 />
                 <div className="grid gap-3 md:grid-cols-2">
-                  <Input
+                  <PasswordInput
                     id="newPassword"
                     label="New Password"
-                    type="password"
                     value={passwordForm.newPassword}
                     onChange={(e) => setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }))}
                   />
-                  <Input
+                  <PasswordInput
                     id="confirmPassword"
                     label="Confirm New Password"
-                    type="password"
                     value={passwordForm.confirmPassword}
                     onChange={(e) =>
                       setPasswordForm((prev) => ({ ...prev, confirmPassword: e.target.value }))
